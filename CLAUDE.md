@@ -2,15 +2,14 @@
 
 ## Project Overview
 
-This project contains the content infrastructure for paulwerner.net: a branded landing page and a self-hosted Ghost blog at blog.paulwerner.net, deployed as Docker containers behind a reverse proxy with SSL.
+This repository holds the content infrastructure for paulwerner.net: a branded landing page served at the root domain and a self-hosted Ghost blog at `blog.paulwerner.net`. Everything runs as Docker containers on a single VPS behind Caddy, which terminates TLS and routes by hostname.
 
 ## Tech Stack
 
-- **Landing page**: Plain HTML + Tailwind CSS (no framework runtime, compiled via Tailwind CLI or Vite in vanilla mode)
-- **Blog engine**: Ghost (official Docker image)
+- **Landing page**: Plain HTML + Tailwind CSS (no framework runtime, compiled via the Tailwind CLI at build time)
+- **Blog engine**: Ghost 5 (official `ghost:5-alpine` image)
 - **Database**: MySQL 8 (Ghost's recommended database)
-- **Reverse proxy**: [TBD — Traefik or Caddy, decided in Phase 1]
-- **SSL**: Let's Encrypt (automated via reverse proxy)
+- **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
 - **Container orchestration**: Docker Compose
 - **Ghost theme**: Handlebars (Ghost's templating language)
 - **DNS**: Managed at gandi.net
@@ -18,16 +17,16 @@ This project contains the content infrastructure for paulwerner.net: a branded l
 ## Architecture
 
 ```
-                        ┌─────────────────────────────┐
-                        │       Reverse Proxy          │
-                        │   (Traefik or Caddy + SSL)   │
-                        └──────┬──────────────┬────────┘
+                        ┌─────────────────────────┐
+                        │         Caddy            │
+                        │  (TLS + static + proxy)  │
+                        └──────┬──────────────┬────┘
                                │              │
               paulwerner.net   │              │  blog.paulwerner.net
                                │              │
                     ┌──────────▼──┐    ┌──────▼───────┐
                     │ Landing Page │    │    Ghost      │
-                    │  (static)    │    │  (Node.js)   │
+                    │  (static)    │    │  (Node.js)    │
                     └─────────────┘    └──────┬───────┘
                                               │
                                        ┌──────▼───────┐
@@ -35,11 +34,16 @@ This project contains the content infrastructure for paulwerner.net: a branded l
                                        └──────────────┘
 ```
 
-All services run on a single VPS via Docker Compose. The reverse proxy terminates SSL and routes by hostname.
+All services run on a single VPS via Docker Compose on a shared bridge network. Caddy is the only service that publishes ports (80/443); Ghost and MySQL are reachable only inside the Compose network.
 
 ## Hosting
 
-[TBD — decided in Phase 1. Candidates: Hetzner Cloud, OVHcloud, Hostinger VPS. EU data residency preferred.]
+Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the full decision (plan specs, cost, alternatives considered, firewall and backup strategy).
+
+## Domain Mapping
+
+- `paulwerner.net` → Caddy serves static files from `/srv/site` (bind-mounted from `./site/`).
+- `blog.paulwerner.net` → Caddy `reverse_proxy` to `ghost:2368` on the shared Compose network.
 
 ## Key Constraints
 
@@ -52,36 +56,27 @@ All services run on a single VPS via Docker Compose. The reverse proxy terminate
 
 ```
 .
+├── .env.example            # template for environment variables
+├── .gitignore
+├── Caddyfile               # reverse-proxy config (Caddy 2)
 ├── CLAUDE.md
-├── docker-compose.yml
-├── landing-page/
-│   ├── index.html
-│   ├── tailwind.config.js
-│   ├── src/
-│   │   └── input.css       # Tailwind directives
-│   ├── dist/
-│   │   └── output.css      # compiled Tailwind CSS
-│   └── assets/              # images, fonts, favicon
-├── ghost-theme/
-│   ├── package.json
-│   ├── index.hbs
-│   ├── default.hbs
-│   ├── post.hbs
-│   ├── partials/
-│   └── assets/
-│       ├── css/
-│       └── js/
-├── config/
-│   └── reverse-proxy/    # proxy config files
+├── README.md
+├── docker-compose.yml      # three-service stack: caddy, ghost, mysql
 ├── docs/
-│   ├── plans/            # session plans (NNN-*.md)
-│   ├── sessions/         # session summaries (NNN-*.md)
-│   ├── learnings/        # brief records of discoveries (NNN-*.md)
-│   └── brand/            # brand guidelines, color palette, typography
-└── scripts/
-    ├── deploy.sh          # deployment helpers
-    └── backup.sh          # backup strategy
+│   ├── brand/              # brand guidelines, reference imagery
+│   ├── decisions/          # decision records (NNN-*.md)
+│   ├── learnings/          # brief discovery notes (NNN-*.md)
+│   ├── plans/              # session plans (NNN-*.md)
+│   └── sessions/           # session summaries (NNN-*.md)
+└── site/                   # static landing page files served by Caddy
+    └── index.html
 ```
+
+Additional directories will appear in later phases — in particular a `ghost-theme/` for the custom Handlebars theme and `scripts/` for deployment and backup helpers. They are not scaffolded until the session that first needs them.
+
+## Environment Variables
+
+Runtime configuration lives in `.env` at the repo root (gitignored). A committed template at `.env.example` documents every key and its role. The `.env` file must exist before `docker compose up` is run.
 
 ## Session Lifecycle
 
@@ -97,7 +92,8 @@ Each session follows this flow — do not skip or reorder steps:
 ## Workflow Rules
 
 - **Session summaries:** Written to `docs/sessions/NNN-short-description.md` covering what was built, key decisions, commits, and what's next. Only created after the implementation is accepted. Check existing files in `docs/sessions/` for the next index.
-- **Historical docs are immutable:** Files in `docs/plans/`, `docs/sessions/`, and `docs/learnings/` are historical records — never modify them retroactively.
+- **Decision records:** Significant technical decisions (hosting, tooling, architectural choices) are recorded in `docs/decisions/NNN-short-description.md`. Written at the time the decision is made; immutable afterwards.
+- **Historical docs are immutable:** Files in `docs/plans/`, `docs/sessions/`, `docs/learnings/`, and `docs/decisions/` are historical records — never modify them retroactively.
 - **Learnings:** When a session produces a significant learning (a wrong assumption corrected, a technical constraint discovered, a failed approach), document it in `docs/learnings/NNN-brief-summary.md`. Brief: 1–2 paragraphs covering what was assumed, what was discovered, what the correct approach is.
 - **CLAUDE.md is a living document:** Update it at the end of any session where decisions are made that affect the tech stack, architecture, or workflow. It must always reflect the current state.
 
@@ -113,7 +109,7 @@ Each session follows this flow — do not skip or reorder steps:
 
 [TBD — defined in Phase 2. Brand guidelines will be added to `docs/brand/`.]
 
-Reference `legacy_website.png` in the Project knowledge base for the visual direction of the legacy site. The new design evolves from this aesthetic: dark theme, warm amber/sepia tones, atmospheric industrial imagery, mixed monospace and serif typography.
+Reference `docs/brand/legacy_reference.png` for the visual direction of the legacy site. The new design evolves from this aesthetic: dark theme, warm amber/sepia tones, atmospheric industrial imagery, mixed monospace and serif typography.
 
 ## Code Style
 
