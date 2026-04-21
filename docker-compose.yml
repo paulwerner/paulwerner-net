@@ -1,0 +1,74 @@
+# SKELETON — Phase 3 will finalize.
+# Three services on a single shared network. Only Caddy publishes ports.
+# Environment values are sourced from .env (see .env.example).
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      BLOG_SUBDOMAIN: ${BLOG_SUBDOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./site:/srv/site:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - ghost
+    networks:
+      - web
+
+  ghost:
+    image: ghost:5-alpine
+    restart: unless-stopped
+    environment:
+      url: ${GHOST_URL}
+      database__client: mysql
+      database__connection__host: ${GHOST_DATABASE_HOST}
+      database__connection__user: ${GHOST_DATABASE_USER}
+      database__connection__password: ${GHOST_DATABASE_PASSWORD}
+      database__connection__database: ${GHOST_DATABASE_NAME}
+      mail__transport: ${GHOST_MAIL_TRANSPORT}
+      mail__options__host: ${GHOST_MAIL_HOST}
+      mail__options__port: ${GHOST_MAIL_PORT}
+      mail__options__auth__user: ${GHOST_MAIL_USER}
+      mail__options__auth__pass: ${GHOST_MAIL_PASSWORD}
+    volumes:
+      - ghost_content:/var/lib/ghost/content
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - web
+
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
+  ghost_content:
+  mysql_data:
