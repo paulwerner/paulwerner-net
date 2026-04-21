@@ -1,0 +1,15 @@
+# SKELETON — Phase 3 will finalize.
+# Two site blocks: root domain serves the static landing page, blog
+# subdomain reverse-proxies to the Ghost container. Automatic HTTPS is
+# provided by Caddy via Let's Encrypt.
+
+{$DOMAIN} {
+    root * /srv/site
+    encode gzip
+    file_server
+}
+
+{$BLOG_SUBDOMAIN} {
+    encode gzip
+    reverse_proxy ghost:2368
+}
