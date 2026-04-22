@@ -308,16 +308,24 @@ hr {
 }
 
 .post-card {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 28px;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .post-card:hover {
     background: var(--inset-bg);
     border-color: var(--accent);
+    color: var(--link);
+}
+
+.post-card:visited {
+    color: var(--text);
 }
 
 .post-card__title {
@@ -326,18 +334,7 @@ hr {
     font-size: 20px;
     font-weight: 600;
     line-height: 1.35;
-}
-
-.post-card__title a {
-    color: var(--text);
-}
-
-.post-card__title a:hover {
-    color: var(--link);
-}
-
-.post-card__title a:visited {
-    color: var(--text);
+    color: inherit;
 }
 
 .post-card__excerpt {
