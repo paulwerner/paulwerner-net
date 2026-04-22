@@ -6,7 +6,7 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 
 ## Tech Stack
 
-- **Landing page**: Plain HTML + Tailwind CSS (no framework runtime, compiled via the Tailwind CLI at build time)
+- **Landing page**: Plain HTML + Tailwind CSS loaded via the Tailwind Play CDN (no build step; a CLI build step can be introduced later if fidelity or offline use demands it)
 - **Blog engine**: Ghost 5 (official `ghost:5-alpine` image)
 - **Database**: MySQL 8 (Ghost's recommended database)
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
@@ -49,7 +49,7 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 
 - **Cost-conscious** — this is a personal blog, not enterprise infrastructure. Prefer simple solutions over complex ones.
 - **Docker-only deployment** — everything runs in containers. No software installed on the host besides Docker and Docker Compose.
-- **Static landing page** — plain HTML + Tailwind CSS with no JavaScript framework. Tailwind is compiled at build time via the Tailwind CLI. The deployed output is a single HTML file, one CSS file, and assets. No JS runtime required.
+- **Static landing page** — plain HTML + Tailwind CSS with no JavaScript framework. Tailwind is loaded via the Tailwind Play CDN (`https://cdn.tailwindcss.com`) with an inline `tailwind.config` for brand tokens. The deployed output is a single HTML file plus the `assets/` directory. A CLI build step can be introduced later if fidelity, performance, or offline use becomes a concern.
 - **Ghost best practices** — follow Ghost's official hosting recommendations (MySQL, not SQLite). Refer to https://ghost.org/docs/ for configuration and theming.
 
 ## Directory Structure
@@ -112,7 +112,7 @@ Each session follows this flow — do not skip or reorder steps:
 
 ## Brand & Design
 
-[TBD — defined in Phase 2. Brand guidelines will be added to `docs/brand/`.]
+See [docs/brand/brand-guidelines.md](docs/brand/brand-guidelines.md) for the full spec — color palette, typography, component patterns, and usage rules.
 
 Reference `docs/brand/legacy_reference.png` for the visual direction of the legacy site. The new design evolves from this aesthetic: dark theme, warm amber/sepia tones, atmospheric industrial imagery, mixed monospace and serif typography.
 
