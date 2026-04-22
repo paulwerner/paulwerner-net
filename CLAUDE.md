@@ -117,7 +117,7 @@ Each session follows this flow — do not skip or reorder steps:
 ## Ghost Theme Development
 
 - Ghost themes use the Handlebars templating engine — not React or any SPA framework.
-- The theme is a self-contained directory that gets zipped and uploaded to Ghost. Ghost's `content/themes/` directory is a named Docker volume, so iteration is zip → upload via `http://blog.localhost/ghost/#/settings/design` → reload.
+- The theme is a self-contained directory under `ghost-theme/`, bind-mounted read-only into the Ghost container at `/var/lib/ghost/content/themes/paulwerner`. Edit files locally and either `docker compose restart ghost` (~5s) or re-activate the theme in admin to pick up `.hbs` and CSS/JS changes. One-time activation at `http://blog.localhost/ghost/#/settings/design` is still required after the first boot. A zip upload is only needed to validate a packaged artifact (gscan-equivalent check) or for environments where the bind mount isn't used.
 - Refer to Ghost's theme documentation: https://ghost.org/docs/themes/
 - Test themes using `ghost inspect` or by uploading to the running Ghost instance.
 - Syntax highlighting uses a self-hosted Prism.js bundle (core + language packs + toolbar + copy-to-clipboard plugin) committed under `ghost-theme/assets/js/`. Prism tokens are re-colored to the brand palette in `ghost-theme/assets/css/prism.css`.
