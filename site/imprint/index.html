@@ -101,10 +101,16 @@
         </a>
       </div>
 
-      <p class="font-typewriter text-[13px] text-muted text-center sm:text-right">&copy; 2026 PW</p>
+      <p class="font-typewriter text-[13px] text-muted text-center sm:text-right">&copy; <span data-year>2026</span> PW</p>
 
     </div>
   </footer>
+
+  <script>
+    document.querySelectorAll('[data-year]').forEach((el) => {
+      el.textContent = new Date().getFullYear();
+    });
+  </script>
 
 </body>
 </html>
