@@ -69,6 +69,11 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 │   ├── plans/              # session plans (NNN-*.md)
 │   └── sessions/           # session summaries (NNN-*.md)
 └── site/                   # static landing page files served by Caddy
+    ├── assets/
+    │   ├── avatar_small.png
+    │   ├── background.png
+    │   └── fonts/
+    │       └── TravelingTypewriter.otf
     └── index.html
 ```
 
