@@ -201,6 +201,105 @@ hr {
     color: var(--accent);
 }
 
+.posts {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.post-card:hover {
+    background: var(--inset-bg);
+    border-color: var(--accent);
+}
+
+.post-card__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.post-card__title a {
+    color: var(--text);
+}
+
+.post-card__title a:hover {
+    color: var(--link);
+}
+
+.post-card__title a:visited {
+    color: var(--text);
+}
+
+.post-card__excerpt {
+    margin: 8px 0 0;
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.post-card__meta {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.post-date {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+.post-card__tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tag-pill {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 10px;
+}
+
+.tag-pill a {
+    color: var(--accent);
+}
+
+.tag-pill a:visited {
+    color: var(--accent);
+}
+
+@media (max-width: 640px) {
+    .post-card {
+        padding: 24px;
+    }
+}
+
 .site-footer {
     margin-top: 96px;
     border-top: 1px solid var(--border);

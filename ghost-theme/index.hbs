@@ -1,7 +1,9 @@
 {{!< default}}
 
-{{#foreach posts}}
-    <article>
-        <h2><a href="{{url}}">{{title}}</a></h2>
-    </article>
-{{/foreach}}
+<div class="posts">
+    {{#foreach posts}}
+        {{> "post-card"}}
+    {{/foreach}}
+</div>
+
+{{pagination}}

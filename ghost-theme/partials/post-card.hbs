@@ -1,1 +1,18 @@
-{{!-- filled in step 4 --}}
+<article class="post-card">
+    <h3 class="post-card__title"><a href="{{url}}">{{title}}</a></h3>
+    {{#if custom_excerpt}}
+        <p class="post-card__excerpt">{{custom_excerpt}}</p>
+    {{else}}
+        <p class="post-card__excerpt">{{excerpt words="30"}}</p>
+    {{/if}}
+    <div class="post-card__meta">
+        <time datetime="{{date format="YYYY-MM-DD"}}" class="post-date">{{date format="MMM D, YYYY"}}</time>
+        {{#if tags}}
+        <ul class="post-card__tags">
+            {{#foreach tags}}
+            <li class="tag-pill">{{name}}</li>
+            {{/foreach}}
+        </ul>
+        {{/if}}
+    </div>
+</article>
