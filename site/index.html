@@ -258,10 +258,18 @@
       float.classList.toggle('pointer-events-none', hide);
     }, { threshold: 0.1 }).observe(card);
 
-    document.getElementById('scroll-indicator').addEventListener('click', (ev) => {
+    const indicator = document.getElementById('scroll-indicator');
+    indicator.addEventListener('click', (ev) => {
       ev.preventDefault();
       document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
     });
+
+    const FADE_DISTANCE = 200;
+    const fadeIndicator = () => {
+      indicator.style.opacity = Math.max(0, 1 - window.scrollY / FADE_DISTANCE);
+    };
+    fadeIndicator();
+    window.addEventListener('scroll', fadeIndicator, { passive: true });
   </script>
 
 </body>
