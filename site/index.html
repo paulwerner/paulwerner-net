@@ -232,16 +232,13 @@
       const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
       const card = (post) => {
-        const article = document.createElement('article');
-        article.className = 'bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent';
+        const article = document.createElement('a');
+        article.href = post.url;
+        article.className = 'block no-underline text-text bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2';
 
         const h3 = document.createElement('h3');
         h3.className = 'font-serif text-[20px] font-semibold leading-[1.35]';
-        const a = document.createElement('a');
-        a.href = post.url;
-        a.className = 'text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm';
-        a.textContent = post.title || '';
-        h3.appendChild(a);
+        h3.textContent = post.title || '';
         article.appendChild(h3);
 
         if (post.excerpt) {
