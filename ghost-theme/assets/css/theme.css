@@ -335,6 +335,152 @@ hr {
     min-width: 1px;
 }
 
+.post__header {
+    margin-bottom: 40px;
+}
+
+.post__title {
+    margin: 0 0 16px;
+    font-family: var(--font-serif);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.post__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.post__reading-time {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+.post__tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-content {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--text);
+}
+
+.post-content > * + * {
+    margin-top: 1.5em;
+}
+
+.post-content h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 2.5em;
+    margin-bottom: 0.5em;
+    line-height: 1.2;
+}
+
+.post-content h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    line-height: 1.3;
+}
+
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 1.75em;
+    margin-bottom: 0.4em;
+    line-height: 1.3;
+}
+
+.post-content p {
+    margin: 0;
+}
+
+.post-content a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 0.2em;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.post-content a:hover {
+    color: var(--hover);
+    text-decoration-color: var(--accent);
+}
+
+.post-content a:visited {
+    color: var(--gold);
+}
+
+.post-content ul,
+.post-content ol {
+    padding-left: 1.5em;
+    margin: 0;
+}
+
+.post-content li + li {
+    margin-top: 0.5em;
+}
+
+.post-content blockquote {
+    margin: 1.5em 0;
+    padding: 0.25em 0 0.25em 1.5em;
+    border-left: 3px solid var(--accent);
+    color: var(--muted);
+    font-style: italic;
+}
+
+.post-content blockquote p {
+    margin: 0;
+}
+
+.post-content img {
+    border-radius: 4px;
+}
+
+.post-content hr {
+    margin: 2em 0;
+}
+
+.post__nav {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.post__nav a {
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--link);
+}
+
+.post__nav a:hover {
+    color: var(--hover);
+}
+
+.post__nav a:visited {
+    color: var(--link);
+}
+
 .site-footer {
     margin-top: 96px;
     border-top: 1px solid var(--border);

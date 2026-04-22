@@ -1,8 +1,28 @@
 {{!< default}}
 
 {{#post}}
-<article class="{{post_class}}">
-    <h1>{{title}}</h1>
-    {{content}}
+<article class="{{post_class}} post">
+    <header class="post__header">
+        <h1 class="post__title">{{title}}</h1>
+        <div class="post__meta">
+            <time datetime="{{date format="YYYY-MM-DD"}}" class="post-date">{{date format="MMM D, YYYY"}}</time>
+            {{#if reading_time}}<span class="post__reading-time">{{reading_time}}</span>{{/if}}
+            {{#if tags}}
+            <ul class="post__tags">
+                {{#foreach tags}}
+                <li class="tag-pill"><a href="{{url}}">{{name}}</a></li>
+                {{/foreach}}
+            </ul>
+            {{/if}}
+        </div>
+    </header>
+
+    <div class="post-content">
+        {{content}}
+    </div>
+
+    <nav class="post__nav" aria-label="Post navigation">
+        <a href="{{@site.url}}">&larr; Back to posts</a>
+    </nav>
 </article>
 {{/post}}
