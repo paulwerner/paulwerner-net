@@ -80,12 +80,18 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 │   ├── tag.hbs
 │   ├── error-404.hbs
 │   └── package.json
-└── site/                   # static landing page files served by Caddy
+└── site/                   # static landing page + legal pages served by Caddy
     ├── assets/
     │   ├── avatar_small.png
     │   ├── background.png
     │   └── fonts/
     │       └── TravelingTypewriter.otf
+    ├── disclaimer/
+    │   └── index.html
+    ├── imprint/
+    │   └── index.html
+    ├── privacy/
+    │   └── index.html
     └── index.html
 ```
 
