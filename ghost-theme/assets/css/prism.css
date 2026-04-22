@@ -1,1 +1,173 @@
-/* Prism theme — authored in step 7 */
+/* Prism theme — brand-tuned tokens plus toolbar + copy-to-clipboard styling.
+ * Colors map to CSS custom properties defined in theme.css:
+ *   --muted   → comments / doctype
+ *   --text    → punctuation / tag / symbol
+ *   --accent  → keywords / operators / attribute values
+ *   --link    → strings / built-ins / inserted
+ *   --gold    → numbers / booleans / regex
+ *   --hover   → functions / class-names
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    tab-size: 4;
+    hyphens: none;
+    background: transparent;
+}
+
+pre[class*="language-"] {
+    background: var(--inset-bg);
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"] {
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: var(--inset-bg);
+    color: var(--link);
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: var(--text);
+}
+
+.token.namespace {
+    opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: var(--text);
+}
+
+.token.boolean,
+.token.number {
+    color: var(--gold);
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: var(--link);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: var(--accent);
+}
+
+.token.function,
+.token.class-name {
+    color: var(--hover);
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: var(--gold);
+}
+
+.token.important,
+.token.bold {
+    font-weight: 700;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+/* Toolbar plugin */
+div.code-toolbar {
+    position: relative;
+    margin: 1.5em 0;
+}
+
+div.code-toolbar > .toolbar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    gap: 6px;
+}
+
+div.code-toolbar:hover > .toolbar,
+div.code-toolbar:focus-within > .toolbar {
+    opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+    display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 10px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus {
+    color: var(--link);
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* copy-to-clipboard plugin states */
+div.code-toolbar > .toolbar > .toolbar-item > button[data-copy-state="copy-success"] {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button[data-copy-state="copy-error"] {
+    color: #d97b4f;
+    border-color: #d97b4f;
+}
