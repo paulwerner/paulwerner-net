@@ -220,6 +220,38 @@ hr {
     gap: 16px;
 }
 
+.tag-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.tag-header__name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin: 0;
+}
+
+.tag-header__name::after {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+    margin: 8px auto 0;
+}
+
+.tag-header__description {
+    max-width: 560px;
+    margin: 20px auto 0;
+    color: var(--muted);
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
 .post-card {
     background: var(--card-bg);
     border: 1px solid var(--border);

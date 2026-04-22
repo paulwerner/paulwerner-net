@@ -1,11 +1,18 @@
 {{!< default}}
 
-{{#tag}}
-    <h1>{{name}}</h1>
-{{/tag}}
+<section class="tag-header">
+    {{#tag}}
+        <h1 class="tag-header__name">{{name}}</h1>
+        {{#if description}}
+            <p class="tag-header__description">{{description}}</p>
+        {{/if}}
+    {{/tag}}
+</section>
 
-{{#foreach posts}}
-    <article>
-        <h2><a href="{{url}}">{{title}}</a></h2>
-    </article>
-{{/foreach}}
+<div class="posts">
+    {{#foreach posts}}
+        {{> "post-card"}}
+    {{/foreach}}
+</div>
+
+{{pagination}}
