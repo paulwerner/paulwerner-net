@@ -583,7 +583,28 @@ hr {
 }
 
 .post-content img {
+    max-width: 100%;
+    height: auto;
     border-radius: 4px;
+}
+
+.post__feature-image {
+    margin: 0 0 48px;
+}
+
+.post__feature-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.post__feature-image figcaption {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
 }
 
 .post-content hr {
