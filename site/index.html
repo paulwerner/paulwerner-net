@@ -87,7 +87,9 @@
 
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-bg focus:text-link focus:border focus:border-accent focus:px-3 focus:py-2 focus:rounded">Skip to content</a>
 
-  <div id="floating-avatar" class="fixed top-5 left-5 w-11 h-11 rounded-full border-2 border-accent overflow-hidden z-40 opacity-0 scale-75 pointer-events-none transition-all duration-300 motion-reduce:transition-none"></div>
+  <div id="floating-avatar" class="fixed top-5 left-5 w-11 h-11 rounded-full border-2 border-accent overflow-hidden z-40 opacity-0 scale-75 pointer-events-none transition-all duration-300 motion-reduce:transition-none">
+    <img src="assets/avatar_small.png" alt="" class="w-full h-full object-cover">
+  </div>
 
   <main id="main">
     <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden px-4">
@@ -245,6 +247,22 @@
 
     </div>
   </footer>
+
+  <script>
+    const card = document.getElementById('hero-card');
+    const float = document.getElementById('floating-avatar');
+    new IntersectionObserver(([entry]) => {
+      const hide = entry.isIntersecting;
+      float.classList.toggle('opacity-0', hide);
+      float.classList.toggle('scale-75', hide);
+      float.classList.toggle('pointer-events-none', hide);
+    }, { threshold: 0.1 }).observe(card);
+
+    document.getElementById('scroll-indicator').addEventListener('click', (ev) => {
+      ev.preventDefault();
+      document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+    });
+  </script>
 
 </body>
 </html>
