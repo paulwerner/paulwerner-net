@@ -300,6 +300,41 @@ hr {
     }
 }
 
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pagination__link {
+    color: var(--link);
+}
+
+.pagination__link:hover {
+    color: var(--hover);
+}
+
+.pagination__link:visited {
+    color: var(--link);
+}
+
+.pagination__page {
+    color: var(--muted);
+}
+
+.pagination__placeholder {
+    display: inline-block;
+    min-width: 1px;
+}
+
 .site-footer {
     margin-top: 96px;
     border-top: 1px solid var(--border);

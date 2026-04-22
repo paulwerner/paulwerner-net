@@ -1,1 +1,17 @@
-{{!-- filled in step 5 --}}
+{{#if pagination.pages}}
+<nav class="pagination" aria-label="Pagination">
+    {{#if pagination.prev}}
+        <a class="pagination__link pagination__link--prev" href="{{page_url pagination.prev}}" rel="prev">&larr; Newer</a>
+    {{else}}
+        <span class="pagination__placeholder" aria-hidden="true"></span>
+    {{/if}}
+
+    <span class="pagination__page">Page {{pagination.page}} of {{pagination.pages}}</span>
+
+    {{#if pagination.next}}
+        <a class="pagination__link pagination__link--next" href="{{page_url pagination.next}}" rel="next">Older &rarr;</a>
+    {{else}}
+        <span class="pagination__placeholder" aria-hidden="true"></span>
+    {{/if}}
+</nav>
+{{/if}}
