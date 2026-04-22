@@ -125,13 +125,15 @@
         <p class="mt-6">Now working independently from Hamburg. I like building things from scratch, understanding every layer of the stack, and sharing what I learn along the way.</p>
       </div>
     </section>
-    <section id="posts-section" hidden class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
+    <section id="posts-section" class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
       <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Recent Posts</h2>
       <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
 
-      <div id="posts-list" class="flex flex-col gap-4 mt-12"></div>
+      <div id="posts-list" class="flex flex-col gap-4 mt-12" hidden></div>
 
-      <div class="text-center mt-10">
+      <p id="posts-empty" class="font-typewriter text-[14px] uppercase tracking-[2px] text-muted text-center mt-12">Coming soon</p>
+
+      <div id="posts-all" class="text-center mt-10" hidden>
         <a id="posts-all-link" href="#" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
           <span>All posts</span>
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -140,6 +142,12 @@
           </svg>
         </a>
       </div>
+    </section>
+    <section id="projects" class="max-w-[720px] mx-auto pt-10 pb-[80px] sm:pb-[100px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Projects</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <p class="font-typewriter text-[14px] uppercase tracking-[2px] text-muted text-center mt-12">Coming soon</p>
     </section>
   </main>
 
@@ -212,8 +220,9 @@
     };
 
     (async () => {
-      const section = document.getElementById('posts-section');
       const list = document.getElementById('posts-list');
+      const empty = document.getElementById('posts-empty');
+      const all = document.getElementById('posts-all');
       const allLink = document.getElementById('posts-all-link');
       allLink.href = GHOST.GHOST_URL;
 
@@ -270,9 +279,11 @@
         const posts = (data && data.posts) || [];
         if (posts.length === 0) return;
         posts.forEach((post) => list.appendChild(card(post)));
-        section.hidden = false;
+        empty.hidden = true;
+        list.hidden = false;
+        all.hidden = false;
       } catch (_) {
-        // Network/CORS error — leave section hidden.
+        // Network/CORS error — leave the "Coming soon" placeholder visible.
       }
     })();
   </script>
