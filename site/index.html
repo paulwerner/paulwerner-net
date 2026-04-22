@@ -1,14 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>paulwerner.net</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paul Werner — Software Engineer</title>
+  <meta name="description" content="Paul Werner — software engineer based in Berlin. Systems, craft, and quiet engineering.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0f0b07',
+            'card-bg': '#161210',
+            'inset-bg': '#1e1a16',
+            accent: '#be884b',
+            text: '#d8d6cf',
+            link: '#f4e4c0',
+            gold: '#f3ca84',
+            hover: '#ae8d67',
+            muted: '#8a8478',
+            border: '#2a2420',
+          },
+          fontFamily: {
+            typewriter: ['TravelingTypewriter', '"Special Elite"', 'monospace'],
+            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            card: '9px 8px 11px -4px rgba(0,0,0,0.3)',
+          },
+          keyframes: {
+            'hero-in': {
+              '0%':   { opacity: '0', transform: 'translateY(12px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+          animation: {
+            'hero-in': 'hero-in 0.6s ease-out both',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    @font-face {
+      font-family: 'TravelingTypewriter';
+      src: url('assets/fonts/TravelingTypewriter.otf') format('opentype');
+      font-display: swap;
+    }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    ::selection { background: #be884b; color: #0f0b07; }
+
+    .hero-bg {
+      background-image:
+        linear-gradient(to bottom, rgba(15,11,7,0) 0%, rgba(15,11,7,0.15) 50%, rgba(15,11,7,1) 100%),
+        url('assets/background.png');
+      background-size: auto, contain;
+      background-position: top center, top center;
+      background-repeat: no-repeat, no-repeat;
+      background-attachment: scroll, fixed;
+    }
+    @media (max-width: 640px) {
+      .hero-bg { background-attachment: scroll, scroll; }
+    }
+
+    .hero-grain {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      opacity: 0.03;
+      mix-blend-mode: overlay;
+    }
+  </style>
 </head>
-<body>
-    <main>
-        <h1>paulwerner.net</h1>
-        <p>Placeholder landing page. The real design lands in Phase 2/3.</p>
-    </main>
+<body class="bg-bg text-text font-serif antialiased">
+
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-bg focus:text-link focus:border focus:border-accent focus:px-3 focus:py-2 focus:rounded">Skip to content</a>
+
+  <div id="floating-avatar" class="fixed top-5 left-5 w-11 h-11 rounded-full border-2 border-accent overflow-hidden z-40 opacity-0 scale-75 pointer-events-none transition-all duration-300 motion-reduce:transition-none"></div>
+
+  <main id="main">
+    <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden"></section>
+    <section id="about"></section>
+    <section id="posts"></section>
+    <section id="projects"></section>
+  </main>
+
+  <footer></footer>
+
 </body>
 </html>
