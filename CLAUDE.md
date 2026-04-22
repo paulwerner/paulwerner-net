@@ -68,6 +68,18 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 │   ├── learnings/          # brief discovery notes (NNN-*.md)
 │   ├── plans/              # session plans (NNN-*.md)
 │   └── sessions/           # session summaries (NNN-*.md)
+├── ghost-theme/            # custom Ghost theme (Handlebars + plain CSS)
+│   ├── assets/
+│   │   ├── css/            # theme.css (brand tokens, layout, prose) + prism.css
+│   │   ├── fonts/          # bundled TravelingTypewriter.otf
+│   │   └── js/             # bundled Prism (core + languages + toolbar plugins)
+│   ├── partials/           # navigation, footer, post-card, pagination
+│   ├── default.hbs         # base layout consumed by every template
+│   ├── index.hbs
+│   ├── post.hbs
+│   ├── tag.hbs
+│   ├── error-404.hbs
+│   └── package.json
 └── site/                   # static landing page files served by Caddy
     ├── assets/
     │   ├── avatar_small.png
@@ -77,7 +89,7 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
     └── index.html
 ```
 
-Additional directories will appear in later phases — in particular a `ghost-theme/` for the custom Handlebars theme and `scripts/` for deployment and backup helpers. They are not scaffolded until the session that first needs them.
+A `scripts/` directory for deployment and backup helpers will appear in a later phase and is not scaffolded yet.
 
 ## Environment Variables
 
@@ -105,10 +117,10 @@ Each session follows this flow — do not skip or reorder steps:
 ## Ghost Theme Development
 
 - Ghost themes use the Handlebars templating engine — not React or any SPA framework.
-- The theme is a self-contained directory that gets zipped and uploaded to Ghost.
+- The theme is a self-contained directory that gets zipped and uploaded to Ghost. Ghost's `content/themes/` directory is a named Docker volume, so iteration is zip → upload via `http://blog.localhost/ghost/#/settings/design` → reload.
 - Refer to Ghost's theme documentation: https://ghost.org/docs/themes/
 - Test themes using `ghost inspect` or by uploading to the running Ghost instance.
-- Code block styling is critical — the blog serves technical content. Ensure syntax highlighting (via highlight.js or Prism.js) and a copy-to-clipboard button.
+- Syntax highlighting uses a self-hosted Prism.js bundle (core + language packs + toolbar + copy-to-clipboard plugin) committed under `ghost-theme/assets/js/`. Prism tokens are re-colored to the brand palette in `ghost-theme/assets/css/prism.css`.
 
 ## Brand & Design
 
