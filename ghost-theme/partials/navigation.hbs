@@ -1,1 +1,14 @@
-{{!-- filled in step 3 --}}
+<header class="site-header">
+    <div class="site-header__inner">
+        <a href="{{@site.url}}" class="site-header__title">{{@site.title}}</a>
+        {{#if @site.navigation}}
+        <nav class="site-nav" aria-label="Primary">
+            <ul class="site-nav__list">
+                {{#foreach @site.navigation}}
+                <li class="site-nav__item"><a class="site-nav__link{{#if current}} is-current{{/if}}" href="{{url}}">{{label}}</a></li>
+                {{/foreach}}
+            </ul>
+        </nav>
+        {{/if}}
+    </div>
+</header>
