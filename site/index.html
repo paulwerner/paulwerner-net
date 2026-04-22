@@ -123,7 +123,60 @@
         <p class="mt-6">My background is in distributed systems and developer tooling. I take on contracts where the scope rewards careful thought over fast turnover. When I'm not at the keyboard you'll find me by the harbour with a camera, or somewhere quieter with a book.</p>
       </div>
     </section>
-    <section id="posts"></section>
+    <section id="posts" class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Recent Posts</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <div class="flex flex-col gap-4 mt-12">
+
+        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
+          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
+            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Caddy as a quiet default</a>
+          </h3>
+          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">After years of nginx config files I keep around like talismans, here's why Caddy is the reverse proxy I now reach for first — and the small handful of cases where it still isn't the right call.</p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
+            <time datetime="2026-03-14" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Mar 14, 2026</time>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">infrastructure</span>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">caddy</span>
+          </div>
+        </article>
+
+        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
+          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
+            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Notes on writing Go for the long haul</a>
+          </h3>
+          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">Five practices that have aged well across a decade of Go services in production. Most of them are about restraint, and one is about admitting when restraint is the wrong choice.</p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
+            <time datetime="2026-02-28" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Feb 28, 2026</time>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">go</span>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">craft</span>
+          </div>
+        </article>
+
+        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
+          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
+            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Why I keep coming back to Postgres</a>
+          </h3>
+          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">A short defence of boring data infrastructure: why a single Postgres instance still beats most distributed alternatives at the scale most projects actually live at.</p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
+            <time datetime="2026-02-09" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Feb 9, 2026</time>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">databases</span>
+            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">postgres</span>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="text-center mt-10">
+        <a href="#" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+          <span>All posts</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"/>
+            <polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </a>
+      </div>
+    </section>
     <section id="projects"></section>
   </main>
 
