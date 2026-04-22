@@ -252,6 +252,56 @@ hr {
     line-height: 1.6;
 }
 
+.error {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 0;
+}
+
+.error__code {
+    font-family: var(--font-serif);
+    font-size: 120px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--accent);
+    margin: 0;
+}
+
+.error__message {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--muted);
+    margin: 16px 0 0;
+}
+
+.error__link {
+    margin-top: 32px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--link);
+}
+
+.error__link:hover {
+    color: var(--hover);
+}
+
+.error__link:visited {
+    color: var(--link);
+}
+
+@media (max-width: 640px) {
+    .error__code {
+        font-size: 96px;
+    }
+}
+
 .post-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
