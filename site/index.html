@@ -90,7 +90,30 @@
   <div id="floating-avatar" class="fixed top-5 left-5 w-11 h-11 rounded-full border-2 border-accent overflow-hidden z-40 opacity-0 scale-75 pointer-events-none transition-all duration-300 motion-reduce:transition-none"></div>
 
   <main id="main">
-    <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden"></section>
+    <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden px-4">
+      <div class="hero-bg absolute inset-0 z-0" aria-hidden="true"></div>
+      <div class="hero-grain absolute inset-0 z-0 pointer-events-none" aria-hidden="true"></div>
+
+      <div id="hero-card" class="relative z-10 w-[90%] sm:w-[85%] max-w-[640px] mx-auto bg-bg border-[3px] border-accent rounded-md shadow-card px-6 pt-4 pb-7 sm:px-8 sm:pt-5 sm:pb-9 text-center motion-safe:animate-hero-in">
+        <img src="assets/avatar_small.png" alt="Cartoon avatar of Paul Werner" class="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] rounded-full border-[3px] border-accent mt-[-55px] sm:mt-[-70px] mx-auto object-cover">
+
+        <h1 class="font-serif text-[28px] sm:text-[36px] font-bold tracking-[1px] mt-5">Paul Werner</h1>
+
+        <p class="font-typewriter text-[14px] sm:text-base uppercase tracking-[4px] text-text mt-3">{ SOFTWARE ENGINEER }</p>
+
+        <blockquote class="font-serif text-[15px] italic text-text max-w-[480px] mx-auto mt-6 leading-relaxed">
+          Out of clutter, find simplicity. From discord, find harmony. In the middle of difficulty lies opportunity.
+        </blockquote>
+        <cite class="block font-typewriter text-[13px] tracking-[1px] text-hover not-italic mt-3">— Albert Einstein</cite>
+      </div>
+
+      <a id="scroll-indicator" href="#about" class="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+        <span class="font-typewriter text-[11px] uppercase tracking-wider">scroll</span>
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </a>
+    </section>
     <section id="about"></section>
     <section id="posts"></section>
     <section id="projects"></section>
