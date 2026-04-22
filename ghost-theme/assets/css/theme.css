@@ -1,0 +1,27 @@
+@font-face {
+    font-family: "TravelingTypewriter";
+    src: url("../fonts/TravelingTypewriter.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --bg: #0f0b07;
+    --card-bg: #161210;
+    --inset-bg: #1e1a16;
+    --accent: #be884b;
+    --text: #d8d6cf;
+    --link: #f4e4c0;
+    --gold: #f3ca84;
+    --hover: #ae8d67;
+    --muted: #8a8478;
+    --border: #2a2420;
+
+    --font-display: "TravelingTypewriter", "Special Elite", monospace;
+    --font-serif: "Source Serif 4", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --content-width: 720px;
+    --index-width: 780px;
+}
