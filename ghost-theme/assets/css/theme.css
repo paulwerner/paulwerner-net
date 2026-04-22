@@ -430,8 +430,35 @@ hr {
     min-width: 1px;
 }
 
-.post__header {
+.post__header,
+.page__header {
     margin-bottom: 40px;
+}
+
+.page__feature-image {
+    margin: 0 0 32px;
+}
+
+.page__feature-image img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.page__feature-image figcaption {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.page__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .post__title {

@@ -11,8 +11,7 @@
     "ghost-theme"
   ],
   "engines": {
-    "ghost": ">=5.0.0",
-    "ghost-api": "v5"
+    "ghost": ">=5.0.0"
   },
   "config": {
     "posts_per_page": 10,
