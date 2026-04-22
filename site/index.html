@@ -125,52 +125,14 @@
         <p class="mt-6">Now working independently from Hamburg. I like building things from scratch, understanding every layer of the stack, and sharing what I learn along the way.</p>
       </div>
     </section>
-    <section id="posts" class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
+    <section id="posts-section" hidden class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
       <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Recent Posts</h2>
       <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
 
-      <div class="flex flex-col gap-4 mt-12">
-
-        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
-          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
-            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Caddy as a quiet default</a>
-          </h3>
-          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">After years of nginx config files I keep around like talismans, here's why Caddy is the reverse proxy I now reach for first — and the small handful of cases where it still isn't the right call.</p>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
-            <time datetime="2026-03-14" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Mar 14, 2026</time>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">infrastructure</span>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">caddy</span>
-          </div>
-        </article>
-
-        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
-          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
-            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Notes on writing Go for the long haul</a>
-          </h3>
-          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">Five practices that have aged well across a decade of Go services in production. Most of them are about restraint, and one is about admitting when restraint is the wrong choice.</p>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
-            <time datetime="2026-02-28" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Feb 28, 2026</time>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">go</span>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">craft</span>
-          </div>
-        </article>
-
-        <article class="bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent">
-          <h3 class="font-serif text-[20px] font-semibold leading-[1.35]">
-            <a href="#" class="text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Why I keep coming back to Postgres</a>
-          </h3>
-          <p class="font-serif text-[15px] text-muted leading-[1.6] mt-2">A short defence of boring data infrastructure: why a single Postgres instance still beats most distributed alternatives at the scale most projects actually live at.</p>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
-            <time datetime="2026-02-09" class="font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted">Feb 9, 2026</time>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">databases</span>
-            <span class="inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5">postgres</span>
-          </div>
-        </article>
-
-      </div>
+      <div id="posts-list" class="flex flex-col gap-4 mt-12"></div>
 
       <div class="text-center mt-10">
-        <a href="#" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+        <a id="posts-all-link" href="#" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
           <span>All posts</span>
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="7" y1="17" x2="17" y2="7"/>
@@ -270,6 +232,81 @@
     };
     fadeIndicator();
     window.addEventListener('scroll', fadeIndicator, { passive: true });
+  </script>
+
+  <script>
+    // Ghost Content API — values differ between environments.
+    // Local:      GHOST_URL = 'http://blog.localhost',       CONTENT_API_KEY = <local integration key>
+    // Production: GHOST_URL = 'https://blog.paulwerner.net', CONTENT_API_KEY = <prod integration key>
+    const GHOST = {
+      GHOST_URL: 'http://blog.localhost',
+      CONTENT_API_KEY: 'REPLACE_WITH_CONTENT_API_KEY',
+    };
+
+    (async () => {
+      const section = document.getElementById('posts-section');
+      const list = document.getElementById('posts-list');
+      const allLink = document.getElementById('posts-all-link');
+      allLink.href = GHOST.GHOST_URL;
+
+      const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      const card = (post) => {
+        const article = document.createElement('article');
+        article.className = 'bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent';
+
+        const h3 = document.createElement('h3');
+        h3.className = 'font-serif text-[20px] font-semibold leading-[1.35]';
+        const a = document.createElement('a');
+        a.href = post.url;
+        a.className = 'text-text hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm';
+        a.textContent = post.title || '';
+        h3.appendChild(a);
+        article.appendChild(h3);
+
+        if (post.excerpt) {
+          const p = document.createElement('p');
+          p.className = 'font-serif text-[15px] text-muted leading-[1.6] mt-2';
+          p.textContent = post.excerpt;
+          article.appendChild(p);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'flex flex-wrap items-center gap-x-4 gap-y-2 mt-4';
+
+        if (post.published_at) {
+          const d = new Date(post.published_at);
+          const time = document.createElement('time');
+          time.setAttribute('datetime', d.toISOString().slice(0, 10));
+          time.className = 'font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted';
+          time.textContent = dateFmt.format(d).toUpperCase();
+          meta.appendChild(time);
+        }
+
+        (post.tags || []).forEach((tag) => {
+          const pill = document.createElement('span');
+          pill.className = 'inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5';
+          pill.textContent = (tag.name || '').toLowerCase();
+          meta.appendChild(pill);
+        });
+
+        article.appendChild(meta);
+        return article;
+      };
+
+      try {
+        const url = `${GHOST.GHOST_URL}/ghost/api/content/posts/?key=${encodeURIComponent(GHOST.CONTENT_API_KEY)}&limit=3&fields=title,slug,url,excerpt,published_at&include=tags`;
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        const posts = (data && data.posts) || [];
+        if (posts.length === 0) return;
+        posts.forEach((post) => list.appendChild(card(post)));
+        section.hidden = false;
+      } catch (_) {
+        // Network/CORS error — leave section hidden.
+      }
+    })();
   </script>
 
 </body>
