@@ -70,14 +70,15 @@ curl -I https://blog.paulwerner.net
 ### 4. Ghost first-run setup
 
 1. Visit <https://blog.paulwerner.net/ghost/> and complete the admin owner setup (name, email, password).
-2. **Settings → Integrations → Add Custom Integration** → name it `Website`. Copy the Content API key.
-3. **Locally**, edit `site/index.html` and replace `REPLACE_WITH_PRODUCTION_API_KEY` with the copied key. Commit and push:
-   ```bash
+2. **Settings → Design → Change theme** → activate the `paulwerner` theme (it's already available via the bind mount).
+3. **Settings → Integrations → Add Custom Integration** → name it `Website`. Copy the Content API key.
+4. **Locally**, edit `site/index.html` and replace `REPLACE_WITH_PRODUCTION_API_KEY` with the copied key. Commit and push:
+```bash
    git commit -am "feat(site): add production Ghost Content API key"
    git push
-   ```
-4. On the server: `cd /opt/paulwerner-net && git pull` — Caddy serves `site/` from the bind mount, no restart needed.
-5. **Settings → Navigation** → ensure a `Home` entry points to `https://paulwerner.net/` so blog visitors can return to the main site.
+```
+5. On the server: `cd /opt/paulwerner-net && git pull` — Caddy serves `site/` from the bind mount, no restart needed.
+6. **Settings → Navigation** → ensure a `Home` entry points to `https://paulwerner.net/` so blog visitors can return to the main site.
 
 ## Update workflow
 
