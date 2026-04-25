@@ -33,6 +33,9 @@ services:
       mail__options__port: ${GHOST_MAIL_PORT}
       mail__options__auth__user: ${GHOST_MAIL_USER}
       mail__options__auth__pass: ${GHOST_MAIL_PASSWORD}
+      # Staff device verification (2FA via email on new devices).
+      # Re-enable (true) once a real SMTP provider is configured.
+      security__staffDeviceVerification: ${SECURITY_STAFF_DEVICE_VERIFICATION:-true}
     volumes:
       - ghost_content:/var/lib/ghost/content
       - ./ghost-theme:/var/lib/ghost/content/themes/paulwerner
