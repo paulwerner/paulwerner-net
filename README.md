@@ -4,25 +4,27 @@ Content infrastructure for paulwerner.net — a static landing page at the root 
 
 ## Architecture
 
-A single VPS runs three containers via Docker Compose: **Caddy** (reverse proxy and static file server, handles TLS), **Ghost** (blog CMS), and **MySQL** (Ghost's database). Caddy is the only service that publishes ports; it terminates HTTPS on 80/443, serves the landing page directly from a bind-mounted `site/` directory, and reverse-proxies the blog subdomain to Ghost.
+A single VPS (Hetzner CAX11 in Nuremberg, Ubuntu 24.04 ARM64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 5** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
 
-See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for hosting provider, plan sizing, and backup strategy.
-
-## Running locally
-
-> This repo is currently in Phase 1 — the Compose stack is a skeleton and is not yet wired for a full run. Phase 3 will finalise it.
-
-Eventually:
+## Local development
 
 ```bash
 cp .env.example .env   # fill in real values
 docker compose up -d
 ```
 
-## Repository layout
+- Landing page: <http://localhost/>
+- Ghost admin: <http://blog.localhost/ghost/>
 
-See [CLAUDE.md](CLAUDE.md) for the full directory structure, session workflow, and conventions.
+## Production
 
-## Brand
+- Landing page: <https://paulwerner.net>
+- Blog: <https://blog.paulwerner.net>
 
-Brand guidelines will be added to `docs/brand/` in Phase 2.
+Server provisioning and the deploy/update workflow are documented in [docs/deployment.md](docs/deployment.md).
+
+## More
+
+- [CLAUDE.md](CLAUDE.md) — directory layout, session workflow, conventions
+- [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) — hosting plan, cost, backup strategy
+- [docs/brand/brand-guidelines.md](docs/brand/brand-guidelines.md) — colors, typography, components
