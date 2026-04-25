@@ -218,12 +218,13 @@
   </script>
 
   <script>
-    // Ghost Content API — values differ between environments.
-    // Local:      GHOST_URL = 'http://blog.localhost',       CONTENT_API_KEY = <local integration key>
-    // Production: GHOST_URL = 'https://blog.paulwerner.net', CONTENT_API_KEY = <prod integration key>
+    // Ghost Content API keys are read-only and public by design — safe to commit.
+    const isLocal = window.location.hostname === 'localhost';
     const GHOST = {
-      GHOST_URL: 'http://blog.localhost',
-      CONTENT_API_KEY: 'REPLACE_WITH_CONTENT_API_KEY',
+      GHOST_URL: isLocal ? 'http://blog.localhost' : 'https://blog.paulwerner.net',
+      CONTENT_API_KEY: isLocal
+        ? '346785a9454fb64a5cd04861b2'
+        : 'REPLACE_WITH_PRODUCTION_API_KEY',
     };
 
     (async () => {
