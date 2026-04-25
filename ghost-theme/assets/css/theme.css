@@ -212,16 +212,14 @@ hr {
     flex-wrap: wrap;
 }
 
-.site-nav__link {
+.site-nav__link,
+.site-nav__link:visited,
+.site-nav__link:hover {
     font-family: var(--font-display);
     font-size: 13px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--muted);
-}
-
-.site-nav__link:hover {
-    color: var(--link);
+    color: var(--gold);
 }
 
 .site-nav__link.is-current {
