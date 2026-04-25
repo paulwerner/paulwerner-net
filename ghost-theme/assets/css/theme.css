@@ -163,6 +163,9 @@ hr {
 }
 
 .site-main {
+    /* width:100% defends against JS-injected resets (sodo-search Tailwind preflight)
+       that can disturb the body flex layout and cause this item to shrink-to-fit. */
+    width: 100%;
     max-width: var(--index-width);
     margin: 0 auto;
     padding: 48px 24px 96px;
