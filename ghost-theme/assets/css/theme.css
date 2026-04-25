@@ -163,15 +163,14 @@ hr {
 }
 
 .site-main {
-    max-width: var(--content-width);
+    max-width: var(--index-width);
     margin: 0 auto;
     padding: 48px 24px 96px;
 }
 
-.home-template .site-main,
-.tag-template .site-main,
-.paged .site-main {
-    max-width: var(--index-width);
+.post-template .site-main,
+.page-template .site-main {
+    max-width: var(--content-width);
 }
 
 .site-header {
