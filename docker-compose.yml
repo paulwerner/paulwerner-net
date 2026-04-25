@@ -34,8 +34,10 @@ services:
       mail__options__auth__user: ${GHOST_MAIL_USER}
       mail__options__auth__pass: ${GHOST_MAIL_PASSWORD}
       # Staff device verification (2FA via email on new devices).
-      # Re-enable (true) once a real SMTP provider is configured.
-      security__staffDeviceVerification: ${SECURITY_STAFF_DEVICE_VERIFICATION:-true}
+      # Default is false because no SMTP provider is configured yet — with
+      # verification on, the verification email never sends and admin login
+      # is blocked. Flip to true (here or via .env) once SMTP works.
+      security__staffDeviceVerification: ${SECURITY_STAFF_DEVICE_VERIFICATION:-false}
     volumes:
       - ghost_content:/var/lib/ghost/content
       - ./ghost-theme:/var/lib/ghost/content/themes/paulwerner
