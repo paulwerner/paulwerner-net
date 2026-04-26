@@ -1,6 +1,7 @@
 {$DOMAIN} {
     root * /srv/site
     encode gzip
+    templates /imprint/*
     file_server
 }
 

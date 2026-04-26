@@ -8,6 +8,8 @@ services:
     environment:
       DOMAIN: ${DOMAIN}
       BLOG_SUBDOMAIN: ${BLOG_SUBDOMAIN}
+      IMPRINT_STREET: ${IMPRINT_STREET}
+      IMPRINT_CITY: ${IMPRINT_CITY}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./site:/srv/site:ro
