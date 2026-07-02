@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book an Appointment — Paul Werner</title>
+  <meta name="description" content="Pick a free time slot for a call with Paul Werner.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0f0b07',
+            'card-bg': '#161210',
+            'inset-bg': '#1e1a16',
+            accent: '#be884b',
+            text: '#d8d6cf',
+            link: '#f4e4c0',
+            gold: '#f3ca84',
+            hover: '#ae8d67',
+            muted: '#8a8478',
+            border: '#2a2420',
+          },
+          fontFamily: {
+            typewriter: ['TravelingTypewriter', '"Special Elite"', 'monospace'],
+            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    @font-face {
+      font-family: 'TravelingTypewriter';
+      src: url('../assets/fonts/TravelingTypewriter.otf') format('opentype');
+      font-display: swap;
+    }
+    html { scrollbar-width: none; }
+    html::-webkit-scrollbar { display: none; }
+    ::selection { background: #be884b; color: #0f0b07; }
+    .day-strip { scrollbar-width: none; }
+    .day-strip::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-bg text-text font-serif antialiased min-h-screen flex flex-col">
+
+  <main class="max-w-[720px] mx-auto px-6 pt-12 pb-12 flex-1 w-full">
+    <a id="back-link" href="/" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+      <span data-back-label>&larr; Back</span>
+    </a>
+
+    <h1 class="font-typewriter text-[28px] tracking-[2px] uppercase mt-10">Book an Appointment</h1>
+    <span class="block w-10 h-0.5 bg-accent mt-2" aria-hidden="true"></span>
+
+    <p id="intro" class="mt-6 font-serif text-[17px] leading-[1.8] text-muted">Loading available times&hellip;</p>
+
+    <!-- Booking UI (hidden until slots are loaded) -->
+    <div id="picker" class="hidden">
+      <p class="mt-1 font-typewriter text-[13px] tracking-[1px] text-muted">Times shown in your timezone (<span id="visitor-tz"></span>).</p>
+
+      <h2 class="font-typewriter text-[16px] tracking-[1.5px] uppercase mt-10">Pick a day</h2>
+      <div id="day-strip" class="day-strip flex gap-2 mt-4 overflow-x-auto pb-2" role="listbox" aria-label="Available days"></div>
+
+      <h2 class="font-typewriter text-[16px] tracking-[1.5px] uppercase mt-8">Pick a time</h2>
+      <div id="slot-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-4" role="listbox" aria-label="Available times"></div>
+
+      <!-- Booking form, revealed once a slot is chosen -->
+      <form id="form" class="hidden mt-10 bg-card-bg border border-border rounded-md p-7">
+        <p class="font-serif text-[17px]">
+          <span class="text-muted">Selected:</span>
+          <span id="selected-label" class="text-gold"></span>
+        </p>
+        <p id="selected-owner-tz" class="mt-1 font-typewriter text-[12px] tracking-[0.5px] text-muted"></p>
+
+        <div class="mt-6">
+          <label for="name" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">Name</label>
+          <input id="name" name="name" type="text" required maxlength="100" autocomplete="name"
+                 class="mt-2 w-full bg-inset-bg border border-border rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent">
+        </div>
+        <div class="mt-5">
+          <label for="email" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">Email</label>
+          <input id="email" name="email" type="email" required maxlength="254" autocomplete="email"
+                 class="mt-2 w-full bg-inset-bg border border-border rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent">
+        </div>
+        <div class="mt-5">
+          <label for="note" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">What would you like to talk about? <span class="normal-case">(optional)</span></label>
+          <textarea id="note" name="note" rows="3" maxlength="500"
+                    class="mt-2 w-full bg-inset-bg border border-border rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent"></textarea>
+        </div>
+        <!-- Honeypot: humans never see or fill this. -->
+        <div class="absolute -left-[9999px] top-auto" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p id="form-error" class="hidden mt-5 font-serif text-[15px] text-gold"></p>
+
+        <button id="submit" type="submit"
+                class="mt-7 inline-block font-typewriter text-[14px] uppercase tracking-[2px] bg-accent text-bg rounded-md px-8 py-3 transition-colors duration-300 hover:bg-gold disabled:opacity-50 disabled:hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+          Confirm booking
+        </button>
+      </form>
+    </div>
+
+    <!-- Success state replaces the picker -->
+    <div id="success" class="hidden mt-10 bg-card-bg border border-accent rounded-md p-7">
+      <h2 class="font-typewriter text-[18px] tracking-[1.5px] uppercase text-gold">Booked!</h2>
+      <p class="mt-4 font-serif text-[17px] leading-[1.8]">Your appointment is confirmed for <span id="success-time" class="text-gold"></span>.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">A confirmation email with a calendar invite and a cancellation link is on its way to you.</p>
+    </div>
+
+    <!-- Unavailable / error state -->
+    <div id="unavailable" class="hidden mt-10">
+      <p class="font-serif text-[17px] leading-[1.8]">Booking is temporarily unavailable.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">Please try again in a little while, or just write me directly at <a href="mailto:contact@paulwerner.net" class="text-link hover:text-hover underline underline-offset-2">contact@paulwerner.net</a>.</p>
+    </div>
+  </main>
+
+  <footer class="max-w-[960px] mx-auto border-t border-border px-6 py-8 w-full">
+    <div class="grid grid-cols-1 sm:grid-cols-3 sm:items-center gap-5">
+
+      <nav class="flex flex-wrap justify-center sm:justify-start items-center gap-x-5 gap-y-2" aria-label="Legal">
+        <a href="/imprint/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Imprint</a>
+        <a href="/privacy/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Privacy</a>
+        <a href="/disclaimer/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Disclaimer</a>
+      </nav>
+
+      <div class="flex items-center justify-center gap-5">
+        <a href="https://github.com/paulwerner" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+          </svg>
+        </a>
+        <a href="https://blog.paulwerner.net" aria-label="Blog" class="text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/in/paul-werner/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+      </div>
+
+      <p class="font-typewriter text-[13px] text-muted text-center sm:text-right">&copy; <span data-year>2026</span> Paul Werner</p>
+
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('[data-year]').forEach((el) => {
+      el.textContent = new Date().getFullYear();
+    });
+
+    (() => {
+      const back = document.getElementById('back-link');
+      if (!back) return;
+      try {
+        const ref = document.referrer && new URL(document.referrer);
+        if (ref && /^blog\./.test(ref.hostname)) {
+          back.href = ref.origin + '/';
+          const label = back.querySelector('[data-back-label]');
+          if (label) label.innerHTML = '&larr; Back to blog';
+        }
+      } catch (_) {}
+    })();
+
+    (() => {
+      const API = '/api/book';
+      const $ = (id) => document.getElementById(id);
+
+      const visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      // en-CA formats as YYYY-MM-DD — a stable, sortable grouping key.
+      const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: visitorTz, year: 'numeric', month: '2-digit', day: '2-digit' });
+      const dayLabelFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+      const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
+      const fullFmt = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+      let meta = null;
+      let byDay = new Map(); // 'YYYY-MM-DD' -> [Date]
+      let selectedDayKey = null;
+      let selectedSlot = null; // Date
+
+      function chipClasses(selected) {
+        return 'shrink-0 font-typewriter text-[12px] tracking-[1px] border rounded-[3px] px-3 py-2 transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ' +
+          (selected ? 'border-accent text-accent bg-inset-bg' : 'border-border text-muted hover:text-link hover:border-accent');
+      }
+
+      function groupSlots(slots) {
+        byDay = new Map();
+        for (const iso of slots) {
+          const date = new Date(iso);
+          const key = dayKeyFmt.format(date);
+          if (!byDay.has(key)) byDay.set(key, []);
+          byDay.get(key).push(date);
+        }
+      }
+
+      function renderDays() {
+        const strip = $('day-strip');
+        strip.replaceChildren();
+        for (const [key, slots] of byDay) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = chipClasses(key === selectedDayKey);
+          btn.setAttribute('role', 'option');
+          btn.setAttribute('aria-selected', String(key === selectedDayKey));
+          btn.textContent = `${dayLabelFmt.format(slots[0])} (${slots.length})`;
+          btn.addEventListener('click', () => {
+            selectedDayKey = key;
+            selectedSlot = null;
+            $('form').classList.add('hidden');
+            renderDays();
+            renderSlots();
+          });
+          strip.appendChild(btn);
+        }
+      }
+
+      function renderSlots() {
+        const grid = $('slot-grid');
+        grid.replaceChildren();
+        for (const date of byDay.get(selectedDayKey) ?? []) {
+          const selected = selectedSlot && date.getTime() === selectedSlot.getTime();
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'font-typewriter text-[13px] tracking-[1px] border rounded-[3px] px-3 py-3 transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ' +
+            (selected ? 'bg-accent text-bg border-accent' : 'border-border text-text hover:border-accent hover:text-link');
+          btn.setAttribute('role', 'option');
+          btn.setAttribute('aria-selected', String(!!selected));
+          btn.textContent = timeFmt.format(date);
+          btn.addEventListener('click', () => selectSlot(date));
+          grid.appendChild(btn);
+        }
+      }
+
+      function selectSlot(date) {
+        selectedSlot = date;
+        renderSlots();
+        $('selected-label').textContent = fullFmt.format(date);
+        const ownerFmt = new Intl.DateTimeFormat('en-GB', { timeZone: meta.ownerTimezone, hour: '2-digit', minute: '2-digit' });
+        $('selected-owner-tz').textContent = `${ownerFmt.format(date)} in ${meta.ownerTimezone} · ${meta.slotDurationMinutes} minutes`;
+        $('form-error').classList.add('hidden');
+        $('form').classList.remove('hidden');
+        $('form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function showError(message) {
+        const el = $('form-error');
+        el.textContent = message;
+        el.classList.remove('hidden');
+      }
+
+      async function load() {
+        let res;
+        try {
+          res = await fetch(`${API}/slots`);
+        } catch (_) {
+          res = null;
+        }
+        if (!res || !res.ok) {
+          $('intro').classList.add('hidden');
+          $('unavailable').classList.remove('hidden');
+          return;
+        }
+        meta = await res.json();
+        groupSlots(meta.slots);
+        if (byDay.size === 0) {
+          $('intro').textContent = 'No free slots right now — please check back soon, or write me directly.';
+          return;
+        }
+        selectedDayKey = byDay.keys().next().value;
+        $('intro').textContent = `${meta.meetingTitle} · ${meta.slotDurationMinutes} minutes. ${meta.locationNote || ''}`.trim();
+        $('visitor-tz').textContent = visitorTz;
+        renderDays();
+        renderSlots();
+        $('picker').classList.remove('hidden');
+      }
+
+      $('form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!selectedSlot) return;
+        const submit = $('submit');
+        submit.disabled = true;
+        submit.textContent = 'Booking…';
+        try {
+          const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              start: selectedSlot.toISOString().replace('.000Z', 'Z'),
+              name: $('name').value,
+              email: $('email').value,
+              note: $('note').value || undefined,
+              website: $('website').value,
+            }),
+          });
+          if (res.status === 201) {
+            $('picker').classList.add('hidden');
+            $('intro').classList.add('hidden');
+            $('success-time').textContent = fullFmt.format(selectedSlot);
+            $('success').classList.remove('hidden');
+            return;
+          }
+          if (res.status === 409) {
+            showError('That slot was just taken — please pick another time.');
+            selectedSlot = null;
+            $('form').classList.add('hidden');
+            await load();
+            return;
+          }
+          if (res.status === 422) {
+            const body = await res.json().catch(() => ({}));
+            showError(`Please check the ${body.field ?? 'form'} field.`);
+            return;
+          }
+          if (res.status === 429) {
+            showError('Too many attempts from your network — please try again later.');
+            return;
+          }
+          showError('Something went wrong — please try again, or write me an email.');
+        } catch (_) {
+          showError('Network error — please try again.');
+        } finally {
+          submit.disabled = false;
+          submit.textContent = 'Confirm booking';
+        }
+      });
+
+      load();
+    })();
+  </script>
+
+</body>
+</html>
