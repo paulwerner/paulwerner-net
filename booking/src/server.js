@@ -2,7 +2,7 @@ import { randomBytes, createHash, timingSafeEqual } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import express from 'express';
 import { loadConfig } from './config.js';
-import { computeSlots } from './slots.js';
+import { computeSlots, toUtcIso } from './slots.js';
 import { createBusySource } from './busy.js';
 import { openDb, SlotTakenError } from './db.js';
 import { createMailer } from './mailer.js';
@@ -40,7 +40,9 @@ function maintenance() {
 maintenance();
 setInterval(maintenance, DAY_MS).unref();
 
-const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]+\.[^\s@]{2,}$/;
+// Strict charset: nodemailer splits "to" on commas and the address lands in
+// an ICS mailto:, so list separators and quoting characters must not pass.
+const EMAIL_RE = /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 function cleanText(value, maxLength) {
   if (typeof value !== 'string') return null;
@@ -54,22 +56,34 @@ function normalizeStart(value) {
   if (typeof value !== 'string') return null;
   const ms = Date.parse(value);
   if (Number.isNaN(ms) || ms % 60000 !== 0) return null;
-  return new Date(ms).toISOString().replace('.000Z', 'Z');
+  return toUtcIso(ms);
+}
+
+function validTimezone(value) {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 60) return null;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function hashToken(token) {
+  return createHash('sha256').update(token).digest();
 }
 
 function tokenMatches(row, token) {
   if (typeof token !== 'string' || token.length === 0) return false;
-  const given = createHash('sha256').update(token).digest();
+  const given = hashToken(token);
   const stored = Buffer.from(row.manage_token_hash, 'hex');
   return stored.length === given.length && timingSafeEqual(given, stored);
 }
 
-// maxBusyAgeSeconds shrinks the double-booking window at booking time by
-// forcing a fresher Proton fetch than the regular poll interval.
-async function availableSlots({ maxBusyAgeSeconds } = {}) {
-  const busyIntervals = await busy.getBusyIntervals(
-    maxBusyAgeSeconds ? { maxAgeSeconds: maxBusyAgeSeconds } : {},
-  );
+// maxAgeSeconds shrinks the double-booking window at booking time by forcing
+// a fresher Proton fetch than the regular poll interval.
+async function availableSlots(maxAgeSeconds) {
+  const busyIntervals = await busy.getBusyIntervals({ maxAgeSeconds });
   const bookedIntervals = db.confirmedIntervals(new Date().toISOString());
   return computeSlots({ availability: config.availability, busyIntervals, bookedIntervals });
 }
@@ -81,7 +95,18 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '4kb' }));
 
 app.get('/api/book/health', (req, res) => {
-  res.json({ ok: true, busyFetchedAt: busy.lastFetchedAt(), db: 'ok' });
+  let dbOk = true;
+  try {
+    db.ping();
+  } catch (err) {
+    console.error('health: db ping failed:', err.message);
+    dbOk = false;
+  }
+  const busyFetchedAt = busy.lastFetchedAt();
+  // No successful busy fetch means every booking request is refused (fail
+  // closed) — surface that as unhealthy so the compose healthcheck sees it.
+  const ok = dbOk && busyFetchedAt !== null;
+  res.status(ok ? 200 : 503).json({ ok, busyFetchedAt, db: dbOk ? 'ok' : 'error' });
 });
 
 app.get('/api/book/slots', createRateLimiter({ limit: 60, windowMs: 60_000 }), async (req, res, next) => {
@@ -109,32 +134,34 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
     const email = cleanText(req.body?.email, 254);
     const note = req.body?.note ? cleanText(req.body.note, 500) : null;
     const start = normalizeStart(req.body?.start);
+    const timezone = req.body?.timezone ? validTimezone(req.body.timezone) : null;
 
-    if (typeof website === 'string' && website !== '') {
-      // Honeypot: pretend success, do nothing.
-      return res.status(201).json({ uid: `booking-${randomBytes(16).toString('hex')}`, start: req.body?.start ?? null });
-    }
     if (!name) return res.status(422).json({ error: 'validation', field: 'name' });
     if (!email || !EMAIL_RE.test(email)) return res.status(422).json({ error: 'validation', field: 'email' });
     if (req.body?.note && note === null) return res.status(422).json({ error: 'validation', field: 'note' });
     if (!start) return res.status(422).json({ error: 'validation', field: 'start' });
 
+    const domain = new URL(config.publicUrl).hostname;
+    const uid = `booking-${randomBytes(16).toString('hex')}@${domain}`;
+    const end = toUtcIso(Date.parse(start) + config.availability.slotDurationMinutes * 60_000);
+    const durationMinutes = config.availability.slotDurationMinutes;
+
+    if (typeof website === 'string' && website !== '') {
+      // Honeypot: pretend success, do nothing. Same response shape as the
+      // real path so the trap cannot be fingerprinted.
+      return res.status(201).json({ uid, start, end, durationMinutes });
+    }
+
     let slots;
     try {
-      slots = await availableSlots({ maxBusyAgeSeconds: 60 });
+      slots = await availableSlots(60);
     } catch (err) {
       console.error('booking refused, busy calendar unavailable:', err.message);
       return res.status(503).json({ error: 'unavailable' });
     }
     if (!slots.includes(start)) return res.status(409).json({ error: 'slot_taken' });
 
-    const domain = new URL(config.publicUrl).hostname;
-    const uid = `booking-${randomBytes(16).toString('hex')}@${domain}`;
     const token = randomBytes(24).toString('base64url');
-    const end = new Date(Date.parse(start) + config.availability.slotDurationMinutes * 60_000)
-      .toISOString()
-      .replace('.000Z', 'Z');
-
     let booking;
     try {
       booking = db.createBooking({
@@ -144,7 +171,8 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
         name,
         email,
         note,
-        manageTokenHash: createHash('sha256').update(token).digest('hex'),
+        timezone,
+        manageTokenHash: hashToken(token).toString('hex'),
         createdAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -153,14 +181,11 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
     }
 
     const manageUrl = `${config.publicUrl}/book/manage/?uid=${encodeURIComponent(uid)}&token=${token}`;
-    try {
-      await mailer.sendBookingEmails({ booking, manageUrl });
-    } catch (err) {
-      // The booking stands; losing the emails must be visible in the logs.
-      console.error(`EMAIL FAILED for ${uid} (${email}, ${start}):`, err);
-    }
+    // Send failures are logged per recipient inside the mailer; the booking
+    // stands either way.
+    await mailer.sendBookingEmails({ booking, manageUrl });
 
-    res.status(201).json({ uid, start, end, durationMinutes: config.availability.slotDurationMinutes });
+    res.status(201).json({ uid, start, end, durationMinutes });
   } catch (err) {
     next(err);
   }
@@ -183,14 +208,11 @@ app.post('/api/book/bookings/:uid/cancel', createRateLimiter({ limit: 10, window
   try {
     const row = db.getBookingByUid(req.params.uid);
     if (!row || !tokenMatches(row, req.body?.token)) return res.status(404).json({ error: 'not_found' });
-    if (row.status === 'cancelled') return res.json({ status: 'cancelled' });
 
+    // The UPDATE is the atomic arbiter: null means another request (or an
+    // earlier one) already cancelled — idempotent success, no second email.
     const cancelled = db.cancelBooking(row.uid, new Date().toISOString());
-    try {
-      await mailer.sendCancellationEmails({ booking: cancelled });
-    } catch (err) {
-      console.error(`EMAIL FAILED for cancellation ${row.uid}:`, err);
-    }
+    if (cancelled) await mailer.sendCancellationEmails({ booking: cancelled });
     res.json({ status: 'cancelled' });
   } catch (err) {
     next(err);

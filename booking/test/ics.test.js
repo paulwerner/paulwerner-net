@@ -87,18 +87,23 @@ test('mailer sends owner invite and prospect confirmation with ICS parts', async
       name: 'Jane Doe',
       email: 'jane@example.com',
       note: 'About the Ghost theme',
+      timezone: 'America/New_York',
     },
     manageUrl: 'https://paulwerner.net/book/manage/?uid=booking-abc@paulwerner.net&token=t0k3n',
   });
 
   assert.equal(sent.length, 2);
-  const [ownerMail, prospectMail] = sent;
-  assert.equal(ownerMail.to, 'owner@proton.me');
+  // Sends run concurrently — resolve recipients by address, not order.
+  const ownerMail = sent.find((m) => m.to === 'owner@proton.me');
+  const prospectMail = sent.find((m) => m.to === 'jane@example.com');
   assert.match(ownerMail.raw, /method=REQUEST/);
   assert.match(ownerMail.subject, /New booking: Jane Doe/);
   // Berlin is UTC+2 in July: 12:00Z → 14:00 local.
   assert.match(ownerMail.subject, /14:00/);
-  assert.equal(prospectMail.to, 'jane@example.com');
+  // The prospect's subject leads with their timezone (New York: 08:00 EDT)
+  // and includes the owner-local time.
+  assert.match(prospectMail.subject, /08:00/);
+  assert.match(prospectMail.subject, /14:00/);
   // Bodies are quoted-printable; undo soft breaks and =3D before matching.
   const decoded = prospectMail.raw.replace(/=\r\n/g, '').replace(/=3D/g, '=');
   assert.match(decoded, /token=t0k3n/);

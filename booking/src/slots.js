@@ -4,10 +4,20 @@ const WEEKDAY_KEYS = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat
 
 const MINUTE = 60 * 1000;
 
+/**
+ * The canonical slot-instant format ("YYYY-MM-DDTHH:MM:SSZ"). Every producer
+ * and consumer of slot strings (slot list, request normalization, storage)
+ * must go through this helper — slot membership and the DB uniqueness index
+ * compare these strings byte for byte.
+ */
+export function toUtcIso(msOrDate) {
+  return new Date(msOrDate).toISOString().replace('.000Z', 'Z');
+}
+
 function toMs(interval) {
   return {
-    start: interval.start instanceof Date ? interval.start.getTime() : new Date(interval.start).getTime(),
-    end: interval.end instanceof Date ? interval.end.getTime() : new Date(interval.end).getTime(),
+    start: new Date(interval.start).getTime(),
+    end: new Date(interval.end).getTime(),
   };
 }
 
@@ -61,7 +71,7 @@ export function computeSlots({ availability, busyIntervals = [], bookedIntervals
           startMs <= horizonMs &&
           !overlapsAny(startMs - bufferBeforeMinutes * MINUTE, endMs + bufferAfterMinutes * MINUTE, blocked);
         if (fits) {
-          slots.push(DateTime.fromMillis(startMs, { zone: 'utc' }).toISO({ suppressMilliseconds: true }));
+          slots.push(toUtcIso(startMs));
         }
         cursor = cursor.plus({ minutes: slotDurationMinutes });
       }

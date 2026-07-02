@@ -59,16 +59,17 @@ export function parseAvailability(yamlText) {
     fail(`timezone "${timezone}" is not a valid IANA timezone`);
   }
 
-  const slotDurationMinutes = raw.slot_duration_minutes;
-  if (!Number.isInteger(slotDurationMinutes) || slotDurationMinutes <= 0) {
-    fail('slot_duration_minutes must be a positive integer');
-  }
-  for (const key of ['buffer_before_minutes', 'buffer_after_minutes', 'min_notice_hours']) {
-    if (!Number.isInteger(raw[key] ?? 0) || (raw[key] ?? 0) < 0) fail(`${key} must be a non-negative integer`);
-  }
-  if (!Number.isInteger(raw.max_horizon_days) || raw.max_horizon_days <= 0) {
-    fail('max_horizon_days must be a positive integer');
-  }
+  // Validation and defaulting in one place, so a key can't join the return
+  // object without passing through the check.
+  const nonNegInt = (key) => {
+    const value = raw[key] ?? 0;
+    if (!Number.isInteger(value) || value < 0) fail(`${key} must be a non-negative integer`);
+    return value;
+  };
+  const positiveInt = (key) => {
+    if (!Number.isInteger(raw[key]) || raw[key] <= 0) fail(`${key} must be a positive integer`);
+    return raw[key];
+  };
 
   if (!raw.meeting?.title || typeof raw.meeting.title !== 'string') fail('meeting.title is required');
 
@@ -87,11 +88,11 @@ export function parseAvailability(yamlText) {
 
   return {
     timezone,
-    slotDurationMinutes,
-    bufferBeforeMinutes: raw.buffer_before_minutes ?? 0,
-    bufferAfterMinutes: raw.buffer_after_minutes ?? 0,
-    minNoticeHours: raw.min_notice_hours ?? 0,
-    maxHorizonDays: raw.max_horizon_days,
+    slotDurationMinutes: positiveInt('slot_duration_minutes'),
+    bufferBeforeMinutes: nonNegInt('buffer_before_minutes'),
+    bufferAfterMinutes: nonNegInt('buffer_after_minutes'),
+    minNoticeHours: nonNegInt('min_notice_hours'),
+    maxHorizonDays: positiveInt('max_horizon_days'),
     meeting: {
       title: raw.meeting.title,
       locationNote: raw.meeting.location_note ?? '',
@@ -101,8 +102,24 @@ export function parseAvailability(yamlText) {
   };
 }
 
+function smtpConfig(env) {
+  // Credentials are mandatory unless AUTH is explicitly opted out (dev sinks
+  // like mailpit) — a missing token must abort boot, not silently produce a
+  // service that accepts bookings and fails every email.
+  const auth = env.BOOKING_SMTP_AUTH ?? 'required';
+  if (!['required', 'none'].includes(auth)) fail(`BOOKING_SMTP_AUTH must be "required" or "none", got "${auth}"`);
+  return {
+    host: requireEnv(env, 'BOOKING_SMTP_HOST'),
+    port: intEnv(env, 'BOOKING_SMTP_PORT', 587),
+    user: auth === 'none' ? '' : requireEnv(env, 'BOOKING_SMTP_USER'),
+    password: auth === 'none' ? '' : requireEnv(env, 'BOOKING_SMTP_PASSWORD'),
+  };
+}
+
 export function loadConfig(env = process.env) {
-  const availabilityPath = env.BOOKING_AVAILABILITY_PATH ?? '/app/availability.yml';
+  // A directory (not the file itself) is bind-mounted, so editors that save
+  // via rename don't leave the container reading a stale inode.
+  const availabilityPath = env.BOOKING_AVAILABILITY_PATH ?? '/app/config/availability.yml';
   let yamlText;
   try {
     yamlText = readFileSync(availabilityPath, 'utf8');
@@ -115,13 +132,7 @@ export function loadConfig(env = process.env) {
     publicUrl: requireEnv(env, 'BOOKING_PUBLIC_URL').replace(/\/$/, ''),
     ownerEmail: requireEnv(env, 'BOOKING_OWNER_EMAIL'),
     fromAddress: requireEnv(env, 'BOOKING_FROM_ADDRESS'),
-    smtp: {
-      host: requireEnv(env, 'BOOKING_SMTP_HOST'),
-      port: intEnv(env, 'BOOKING_SMTP_PORT', 587),
-      // Empty user disables SMTP AUTH (dev sinks like mailpit have none).
-      user: env.BOOKING_SMTP_USER ?? '',
-      password: env.BOOKING_SMTP_PASSWORD ?? '',
-    },
+    smtp: smtpConfig(env),
     busyIcsUrl: requireEnv(env, 'BOOKING_BUSY_ICS_URL'),
     busyTtlSeconds: intEnv(env, 'BOOKING_BUSY_TTL_SECONDS', 300),
     retentionDays: intEnv(env, 'BOOKING_RETENTION_DAYS', 90),

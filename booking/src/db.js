@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   name              TEXT NOT NULL,
   email             TEXT NOT NULL,
   note              TEXT,
+  timezone          TEXT,
   manage_token_hash TEXT NOT NULL,
   ics_sequence      INTEGER NOT NULL DEFAULT 0,
   created_at        TEXT NOT NULL,
@@ -23,6 +24,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_active_slot
   ON bookings (slot_start) WHERE status = 'confirmed';
 `;
 
+// Stored instants are second-precision ("…T12:00:00Z"); inputs must match or
+// the lexicographic SQL comparisons break at sub-second boundaries.
+function secondPrecision(iso) {
+  return iso.replace(/\.\d+Z$/, 'Z');
+}
+
 export function openDb(path) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new Database(path);
@@ -30,8 +37,8 @@ export function openDb(path) {
   db.exec(SCHEMA);
 
   const insertStmt = db.prepare(`
-    INSERT INTO bookings (uid, slot_start, slot_end, name, email, note, manage_token_hash, created_at)
-    VALUES (@uid, @slotStart, @slotEnd, @name, @email, @note, @manageTokenHash, @createdAt)
+    INSERT INTO bookings (uid, slot_start, slot_end, name, email, note, timezone, manage_token_hash, created_at)
+    VALUES (@uid, @slotStart, @slotEnd, @name, @email, @note, @timezone, @manageTokenHash, @createdAt)
   `);
   const byUidStmt = db.prepare('SELECT * FROM bookings WHERE uid = ?');
   const cancelStmt = db.prepare(`
@@ -70,13 +77,17 @@ export function openDb(path) {
     },
 
     confirmedIntervals(fromIso) {
-      return confirmedStmt.all(fromIso).map((row) => ({ start: row.slot_start, end: row.slot_end }));
+      return confirmedStmt.all(secondPrecision(fromIso)).map((row) => ({ start: row.slot_start, end: row.slot_end }));
+    },
+
+    ping() {
+      db.prepare('SELECT 1').get();
     },
 
     // GDPR retention: hard-delete everything whose appointment ended before
     // the cutoff, then write a crash-consistent copy for host-level backup.
     runMaintenance({ retentionDays, backupPath, now = new Date() }) {
-      const cutoff = new Date(now.getTime() - retentionDays * 24 * 3600 * 1000).toISOString();
+      const cutoff = secondPrecision(new Date(now.getTime() - retentionDays * 24 * 3600 * 1000).toISOString());
       const { changes } = cleanupStmt.run(cutoff);
       if (backupPath) {
         mkdirSync(dirname(backupPath), { recursive: true });

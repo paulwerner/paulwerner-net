@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { DateTime } from 'luxon';
 import { buildIcs } from './ics.js';
 
-function ownerLocal(iso, zone) {
+function localized(iso, zone) {
   return DateTime.fromISO(iso, { zone }).toFormat("cccc, d LLLL yyyy 'at' HH:mm ZZZZ");
 }
 
@@ -55,71 +55,96 @@ export function createMailer({ config, transport }) {
     });
   }
 
+  // The two recipients are independent: a failed owner notification must not
+  // cost the prospect their confirmation (it carries the only copy of the
+  // manage link — the token is stored hashed and cannot be resent).
+  async function sendBoth(uid, ownerMail, prospectMail) {
+    const results = await Promise.allSettled([send(ownerMail), send(prospectMail)]);
+    results.forEach((result, i) => {
+      if (result.status === 'rejected') {
+        console.error(`EMAIL FAILED (${i === 0 ? 'owner' : 'prospect'}) for ${uid}:`, result.reason);
+      }
+    });
+  }
+
+  // The prospect saw and picked the slot in their own timezone; the email
+  // must lead with that, or the owner-timezone rendering reads like a
+  // wrongly-recorded booking.
+  function prospectWhen(booking) {
+    const ownerWhen = localized(booking.slot_start, zone);
+    if (!booking.timezone || booking.timezone === zone) return ownerWhen;
+    return `${localized(booking.slot_start, booking.timezone)} (${ownerWhen})`;
+  }
+
   return {
     async sendBookingEmails({ booking, manageUrl }) {
-      const when = ownerLocal(booking.slot_start, zone);
+      const when = localized(booking.slot_start, zone);
       const ics = icsFor(booking, 'REQUEST');
 
-      await send({
-        to: config.ownerEmail,
-        subject: `New booking: ${booking.name} — ${when}`,
-        text: [
-          `${booking.name} <${booking.email}> booked "${title}".`,
-          '',
-          `When: ${when}`,
-          booking.note ? `Note: ${booking.note}` : null,
-          '',
-          'The attached invite is added to Proton Calendar automatically.',
-        ]
-          .filter((line) => line !== null)
-          .join('\n'),
-        ics,
-        method: 'REQUEST',
-      });
-
-      await send({
-        to: booking.email,
-        subject: `Confirmed: ${title} on ${when}`,
-        text: [
-          `Hi ${booking.name},`,
-          '',
-          `your appointment is confirmed: ${when}.`,
-          locationNote,
-          '',
-          'The attached invite adds the appointment to your calendar.',
-          `Need to cancel or reschedule? ${manageUrl}`,
-          '',
-          'Talk soon.',
-        ].join('\n'),
-        ics,
-        method: 'REQUEST',
-      });
+      await sendBoth(
+        booking.uid,
+        {
+          to: config.ownerEmail,
+          subject: `New booking: ${booking.name} — ${when}`,
+          text: [
+            `${booking.name} <${booking.email}> booked "${title}".`,
+            '',
+            `When: ${when}`,
+            booking.note ? `Note: ${booking.note}` : null,
+            '',
+            'The attached invite is added to Proton Calendar automatically.',
+          ]
+            .filter((line) => line !== null)
+            .join('\n'),
+          ics,
+          method: 'REQUEST',
+        },
+        {
+          to: booking.email,
+          subject: `Confirmed: ${title} on ${prospectWhen(booking)}`,
+          text: [
+            `Hi ${booking.name},`,
+            '',
+            `your appointment is confirmed: ${prospectWhen(booking)}.`,
+            locationNote,
+            '',
+            'The attached invite adds the appointment to your calendar.',
+            `Need to cancel or reschedule? ${manageUrl}`,
+            '',
+            'Talk soon.',
+          ].join('\n'),
+          ics,
+          method: 'REQUEST',
+        },
+      );
     },
 
     async sendCancellationEmails({ booking }) {
-      const when = ownerLocal(booking.slot_start, zone);
+      const when = localized(booking.slot_start, zone);
       const ics = icsFor(booking, 'CANCEL');
 
-      await send({
-        to: config.ownerEmail,
-        subject: `Cancelled: ${booking.name} — ${when}`,
-        text: `${booking.name} <${booking.email}> cancelled the ${title} on ${when}.`,
-        ics,
-        method: 'CANCEL',
-      });
-
-      await send({
-        to: booking.email,
-        subject: `Cancelled: ${title} on ${when}`,
-        text: [
-          `Hi ${booking.name},`,
-          '',
-          `your appointment on ${when} is cancelled.`,
-          `You can pick a new time any time: ${config.publicUrl}/book/`,
-        ].join('\n'),
-        ics,
-        method: 'CANCEL',
-      });
+      await sendBoth(
+        booking.uid,
+        {
+          to: config.ownerEmail,
+          subject: `Cancelled: ${booking.name} — ${when}`,
+          text: `${booking.name} <${booking.email}> cancelled the ${title} on ${when}.`,
+          ics,
+          method: 'CANCEL',
+        },
+        {
+          to: booking.email,
+          subject: `Cancelled: ${title} on ${prospectWhen(booking)}`,
+          text: [
+            `Hi ${booking.name},`,
+            '',
+            `your appointment on ${prospectWhen(booking)} is cancelled.`,
+            `You can pick a new time any time: ${config.publicUrl}/book/`,
+          ].join('\n'),
+          ics,
+          method: 'CANCEL',
+        },
+      );
     },
   };
 }
