@@ -2,6 +2,7 @@
     root * /srv/site
     encode gzip
     templates /imprint/*
+    reverse_proxy /api/book/* booking:3000
     file_server
 }
 
