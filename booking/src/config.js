@@ -118,8 +118,9 @@ export function loadConfig(env = process.env) {
     smtp: {
       host: requireEnv(env, 'BOOKING_SMTP_HOST'),
       port: intEnv(env, 'BOOKING_SMTP_PORT', 587),
-      user: requireEnv(env, 'BOOKING_SMTP_USER'),
-      password: requireEnv(env, 'BOOKING_SMTP_PASSWORD'),
+      // Empty user disables SMTP AUTH (dev sinks like mailpit have none).
+      user: env.BOOKING_SMTP_USER ?? '',
+      password: env.BOOKING_SMTP_PASSWORD ?? '',
     },
     busyIcsUrl: requireEnv(env, 'BOOKING_BUSY_ICS_URL'),
     busyTtlSeconds: intEnv(env, 'BOOKING_BUSY_TTL_SECONDS', 300),

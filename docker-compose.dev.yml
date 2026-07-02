@@ -1,0 +1,28 @@
+# Dev-only overlay — never deploy this file.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Replaces the real Proton dependencies of the booking service:
+#   - busy calendar → bundled fixture ICS (booking/test/fixtures/busy.ics)
+#   - SMTP → mailpit sink, web UI at http://localhost:8025
+services:
+  booking:
+    environment:
+      BOOKING_PUBLIC_URL: http://localhost
+      BOOKING_OWNER_EMAIL: owner@example.test
+      BOOKING_FROM_ADDRESS: bookings@example.test
+      BOOKING_SMTP_HOST: mailpit
+      BOOKING_SMTP_PORT: 1025
+      BOOKING_SMTP_USER: ""
+      BOOKING_SMTP_PASSWORD: ""
+      BOOKING_BUSY_ICS_URL: file:///app/test/fixtures/busy.ics
+    volumes:
+      - ./booking/test/fixtures:/app/test/fixtures:ro
+
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+    networks:
+      - web
