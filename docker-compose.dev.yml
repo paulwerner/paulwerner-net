@@ -13,16 +13,23 @@ services:
       BOOKING_FROM_ADDRESS: bookings@example.test
       BOOKING_SMTP_HOST: mailpit
       BOOKING_SMTP_PORT: 1025
-      BOOKING_SMTP_USER: ""
-      BOOKING_SMTP_PASSWORD: ""
+      BOOKING_SMTP_AUTH: none
       BOOKING_BUSY_ICS_URL: file:///app/test/fixtures/busy.ics
     volumes:
       - ./booking/test/fixtures:/app/test/fixtures:ro
+    depends_on:
+      mailpit:
+        condition: service_healthy
 
   mailpit:
     image: axllent/mailpit
     restart: unless-stopped
     ports:
       - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - web
