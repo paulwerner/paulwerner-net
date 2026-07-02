@@ -186,9 +186,10 @@
       const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: visitorTz, year: 'numeric', month: '2-digit', day: '2-digit' });
       const dayLabelFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
       const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
-      const fullFmt = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+      const fullFmt = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
       let meta = null;
+      let ownerFmt = null;
       let byDay = new Map(); // 'YYYY-MM-DD' -> [Date]
       let selectedDayKey = null;
       let selectedSlot = null; // Date
@@ -250,7 +251,6 @@
         selectedSlot = date;
         renderSlots();
         $('selected-label').textContent = fullFmt.format(date);
-        const ownerFmt = new Intl.DateTimeFormat('en-GB', { timeZone: meta.ownerTimezone, hour: '2-digit', minute: '2-digit' });
         $('selected-owner-tz').textContent = `${ownerFmt.format(date)} in ${meta.ownerTimezone} · ${meta.slotDurationMinutes} minutes`;
         $('form-error').classList.add('hidden');
         $('form').classList.remove('hidden');
@@ -276,8 +276,11 @@
           return;
         }
         meta = await res.json();
+        ownerFmt = new Intl.DateTimeFormat('en-GB', { timeZone: meta.ownerTimezone, hour: '2-digit', minute: '2-digit' });
         groupSlots(meta.slots);
         if (byDay.size === 0) {
+          // Also reached via reload after a 409 — clear any stale picker.
+          $('picker').classList.add('hidden');
           $('intro').textContent = 'No free slots right now — please check back soon, or write me directly.';
           return;
         }
@@ -304,6 +307,7 @@
               name: $('name').value,
               email: $('email').value,
               note: $('note').value || undefined,
+              timezone: visitorTz,
               website: $('website').value,
             }),
           });
