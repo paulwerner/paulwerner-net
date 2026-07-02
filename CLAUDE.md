@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository holds the content infrastructure for paulwerner.net: a branded landing page served at the root domain and a self-hosted Ghost blog at `blog.paulwerner.net`. Everything runs as Docker containers on a single VPS behind Caddy, which terminates TLS and routes by hostname.
+This repository holds the content infrastructure for paulwerner.net: a branded landing page served at the root domain, a self-hosted Ghost blog at `blog.paulwerner.net`, and a self-hosted appointment-booking service at `paulwerner.net/book/` synced with the owner's Proton Calendar. Everything runs as Docker containers on a single VPS behind Caddy, which terminates TLS and routes by hostname.
 
 ## Tech Stack
 
@@ -12,29 +12,31 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
 - **Container orchestration**: Docker Compose
 - **Ghost theme**: Handlebars (Ghost's templating language)
+- **Booking service**: Custom Node.js 22 (Express, better-sqlite3, luxon, node-ical, nodemailer) — see [docs/decisions/002-self-hosted-booking-over-calendly.md](docs/decisions/002-self-hosted-booking-over-calendly.md)
 - **DNS**: Managed at gandi.net
 
 ## Architecture
 
 ```
-                        ┌─────────────────────────┐
-                        │         Caddy            │
-                        │  (TLS + static + proxy)  │
-                        └──────┬──────────────┬────┘
-                               │              │
-              paulwerner.net   │              │  blog.paulwerner.net
-                               │              │
-                    ┌──────────▼──┐    ┌──────▼───────┐
-                    │ Landing Page │    │    Ghost      │
-                    │  (static)    │    │  (Node.js)    │
-                    └─────────────┘    └──────┬───────┘
-                                              │
-                                       ┌──────▼───────┐
-                                       │    MySQL      │
-                                       └──────────────┘
+                  ┌────────────────────────────────────┐
+                  │               Caddy                 │
+                  │       (TLS + static + proxy)        │
+                  └───┬───────────────┬────────────┬────┘
+                      │               │            │
+       paulwerner.net │  /api/book/*  │            │ blog.paulwerner.net
+                      │               │            │
+           ┌──────────▼──┐    ┌───────▼─────┐   ┌──▼───────────┐
+           │ Landing Page │    │   Booking   │   │    Ghost      │
+           │  (static)    │    │  (Node.js)  │   │  (Node.js)    │
+           └─────────────┘    └──────┬──────┘   └──────┬───────┘
+                                     │                 │
+                              ┌──────▼──────┐   ┌──────▼───────┐
+                              │   SQLite    │   │    MySQL      │
+                              │  (volume)   │   └──────────────┘
+                              └─────────────┘
 ```
 
-All services run on a single VPS via Docker Compose on a shared bridge network. Caddy is the only service that publishes ports (80/443); Ghost and MySQL are reachable only inside the Compose network.
+All services run on a single VPS via Docker Compose on a shared bridge network. Caddy is the only service that publishes ports (80/443); Ghost, MySQL, and the booking service are reachable only inside the Compose network.
 
 ## Hosting
 
@@ -43,6 +45,7 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 ## Domain Mapping
 
 - `paulwerner.net` → Caddy serves static files from `/srv/site` (bind-mounted from `./site/`).
+- `paulwerner.net/api/book/*` → Caddy `reverse_proxy` to `booking:3000` (the booking pages themselves are static files under `site/book/`).
 - `blog.paulwerner.net` → Caddy `reverse_proxy` to `ghost:2368` on the shared Compose network.
 
 ## Key Constraints
@@ -61,7 +64,14 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 ├── Caddyfile               # reverse-proxy config (Caddy 2)
 ├── CLAUDE.md
 ├── README.md
-├── docker-compose.yml      # three-service stack: caddy, ghost, mysql
+├── docker-compose.yml      # four-service stack: caddy, booking, ghost, mysql
+├── docker-compose.dev.yml  # dev overlay: mailpit SMTP sink + fixture busy calendar
+├── booking/                # custom appointment-booking service (Node.js)
+│   ├── Dockerfile          # multi-stage node:22-alpine
+│   ├── availability.yml    # owner availability config (bind-mounted read-only)
+│   ├── package.json
+│   ├── src/                # server, config, slots engine, busy poller, db, ics, mailer
+│   └── test/               # node --test suites + fixtures/busy.ics
 ├── docs/
 │   ├── brand/              # brand guidelines, reference imagery
 │   ├── decisions/          # decision records (NNN-*.md)
@@ -86,6 +96,10 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
     │   ├── background.png
     │   └── fonts/
     │       └── TravelingTypewriter.otf
+    ├── book/
+    │   ├── index.html      # booking page (slot picker, calls /api/book/*)
+    │   └── manage/
+    │       └── index.html  # cancel page (linked from confirmation email)
     ├── disclaimer/
     │   └── index.html
     ├── imprint/
@@ -128,7 +142,14 @@ Each session follows this flow — do not skip or reorder steps:
 - Test themes using `ghost inspect` or by uploading to the running Ghost instance.
 - Syntax highlighting uses a self-hosted Prism.js bundle (core + language packs + toolbar + copy-to-clipboard plugin) committed under `ghost-theme/assets/js/`. Prism tokens are re-colored to the brand palette in `ghost-theme/assets/css/prism.css`.
 
-## Brand & Design
+## Booking Service
+
+- Custom Calendly-style scheduler under `booking/`, exposed only as `/api/book/*` through Caddy. Architecture and Proton-sync rationale: [docs/decisions/002-self-hosted-booking-over-calendly.md](docs/decisions/002-self-hosted-booking-over-calendly.md).
+- **Proton Calendar sync** (Proton has no API/CalDAV): busy times are polled from the secret "share via link" ICS (`BOOKING_BUSY_ICS_URL`, lags minutes to a few hours); bookings reach Proton Calendar as emailed `METHOD:REQUEST` invites to `BOOKING_OWNER_EMAIL`, which Proton Mail auto-adds. The owner address must be an ATTENDEE and must differ from `BOOKING_FROM_ADDRESS`.
+- **Availability** is configured in `booking/availability.yml` (weekly windows, slot length, buffers, min notice, horizon, blocked dates, meeting title). Edit + `docker compose restart booking` to apply; env var changes need `up -d` instead (see learning 003).
+- **Bookings** live in SQLite on the `booking_data` volume; retention cleanup and a `VACUUM INTO /data/backup/bookings.db` copy run daily. Include this volume in any host backup routine.
+- **Tests**: `cd booking && npm test` (pure slot engine incl. DST cases, busy parsing, db race safety, ICS/mail output).
+- **Local dev**: `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d` swaps Proton for the fixture busy calendar and routes SMTP to mailpit (UI at `http://localhost:8025`).
 
 See [docs/brand/brand-guidelines.md](docs/brand/brand-guidelines.md) for the full spec — color palette, typography, component patterns, and usage rules.
 
