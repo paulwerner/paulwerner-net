@@ -68,7 +68,8 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 ├── docker-compose.dev.yml  # dev overlay: mailpit SMTP sink + fixture busy calendar
 ├── booking/                # custom appointment-booking service (Node.js)
 │   ├── Dockerfile          # multi-stage node:22-alpine
-│   ├── availability.yml    # owner availability config (bind-mounted read-only)
+│   ├── config/
+│   │   └── availability.yml  # owner availability config (directory bind-mounted read-only)
 │   ├── package.json
 │   ├── src/                # server, config, slots engine, busy poller, db, ics, mailer
 │   └── test/               # node --test suites + fixtures/busy.ics
@@ -146,10 +147,12 @@ Each session follows this flow — do not skip or reorder steps:
 
 - Custom Calendly-style scheduler under `booking/`, exposed only as `/api/book/*` through Caddy. Architecture and Proton-sync rationale: [docs/decisions/002-self-hosted-booking-over-calendly.md](docs/decisions/002-self-hosted-booking-over-calendly.md).
 - **Proton Calendar sync** (Proton has no API/CalDAV): busy times are polled from the secret "share via link" ICS (`BOOKING_BUSY_ICS_URL`, lags minutes to a few hours); bookings reach Proton Calendar as emailed `METHOD:REQUEST` invites to `BOOKING_OWNER_EMAIL`, which Proton Mail auto-adds. The owner address must be an ATTENDEE and must differ from `BOOKING_FROM_ADDRESS`.
-- **Availability** is configured in `booking/availability.yml` (weekly windows, slot length, buffers, min notice, horizon, blocked dates, meeting title). Edit + `docker compose restart booking` to apply; env var changes need `up -d` instead (see learning 003).
+- **Availability** is configured in `booking/config/availability.yml` (weekly windows, slot length, buffers, min notice, horizon, blocked dates, meeting title). Edit + `docker compose restart booking` to apply; env var changes need `up -d` instead (see learning 003).
 - **Bookings** live in SQLite on the `booking_data` volume; retention cleanup and a `VACUUM INTO /data/backup/bookings.db` copy run daily. Include this volume in any host backup routine.
 - **Tests**: `cd booking && npm test` (pure slot engine incl. DST cases, busy parsing, db race safety, ICS/mail output).
 - **Local dev**: `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d` swaps Proton for the fixture busy calendar and routes SMTP to mailpit (UI at `http://localhost:8025`).
+
+## Brand & Design
 
 See [docs/brand/brand-guidelines.md](docs/brand/brand-guidelines.md) for the full spec — color palette, typography, component patterns, and usage rules.
 
