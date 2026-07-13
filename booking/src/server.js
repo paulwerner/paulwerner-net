@@ -193,7 +193,7 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
   }
 });
 
-app.get('/api/book/bookings/:uid', (req, res) => {
+app.get('/api/book/bookings/:uid', createRateLimiter({ limit: 30, windowMs: 60_000 }), (req, res) => {
   const row = db.getBookingByUid(req.params.uid);
   // Unknown uid and bad token are indistinguishable on purpose.
   if (!row || !tokenMatches(row, req.query.token)) return res.status(404).json({ error: 'not_found' });
