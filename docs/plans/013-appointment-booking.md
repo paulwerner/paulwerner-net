@@ -13,7 +13,7 @@ The landing page's only contact path is the `mailto:` CTA added in session 011. 
 
 1. Email via **Proton SMTP submission** (`smtp.protonmail.ch:587`, SMTP token, sender `bookings@paulwerner.net`). `BOOKING_*` env vars kept **separate** from `GHOST_MAIL_*` (reserved for a future newsletter provider).
 2. **Instant confirmation**; small double-booking risk from busy-ICS lag accepted, mitigated by min-notice + polling + fresh re-fetch at booking time.
-3. Availability via **config file** (`booking/availability.yml`), bind-mounted.
+3. Availability via **config file** (`booking/config/availability.yml`), bind-mounted.
 4. **Node.js** backend, **SQLite** (better-sqlite3) — not MySQL. Small Alpine image.
 
 ## Architecture
@@ -40,7 +40,7 @@ No published host ports (firewall allows only 22/80/443 — decision 001). Libra
 
 - `booking/Dockerfile` — multi-stage node:22-alpine (builder has python3/make/g++ for better-sqlite3 musl-prebuild misses)
 - `booking/package.json` — express, better-sqlite3, nodemailer, node-ical, luxon, yaml; `node --test`
-- `booking/availability.yml` — committed config (no secrets)
+- `booking/config/availability.yml` — committed config (no secrets)
 - `booking/src/server.js` (app wiring, graceful shutdown), `config.js` (env + yaml load, fail-fast validation), `slots.js` (pure slot engine), `busy.js` (ICS poller, `file://` support for dev fixtures), `db.js` (schema, CRUD, retention job), `ics.js` (REQUEST/CANCEL builder, folding/escaping), `mailer.js`, `ratelimit.js` (in-memory per-IP, trusts X-Forwarded-For from Caddy)
 - `booking/test/slots.test.js` (incl. DST-transition dates), `booking/test/fixtures/busy.ics` (mimics Proton Limited view, incl. one RRULE event)
 - `site/book/index.html` — booking page (follows the legal sub-page duplication recipe)
@@ -76,7 +76,7 @@ BOOKING_RETENTION_DAYS=90
 
 Compose passes these through plus `BOOKING_PUBLIC_URL=https://${DOMAIN}`; healthcheck `wget -qO- http://localhost:3000/api/book/health`. Note learning 003: env changes need `up -d`, not `restart`.
 
-**`booking/availability.yml`:**
+**`booking/config/availability.yml`:**
 
 ```yaml
 timezone: Europe/Berlin

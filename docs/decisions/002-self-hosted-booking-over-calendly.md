@@ -21,7 +21,7 @@ Build a custom booking service. Key shape:
 - **Instant confirmation** (Calendly-like) rather than owner approval. The busy-ICS lag leaves a small double-booking window for events created directly in Proton Calendar shortly before a booking; accepted deliberately, mitigated by a 24 h minimum-notice default, a 5-minute poll interval, and a forced fresh ICS fetch at booking time.
 - **Node.js + Express + SQLite (better-sqlite3)**, not MySQL: bookings are a few rows per week; a separate SQLite file keeps the service self-contained, keeps MySQL scoped to Ghost, and makes backup a file copy. Race safety comes from a partial unique index on confirmed slot starts inside a synchronous transaction.
 - **Email via Proton SMTP submission** (`smtp.protonmail.ch:587`, SMTP token, custom-domain sender). Deliberately separate env namespace (`BOOKING_*`) from `GHOST_MAIL_*`, which stays reserved for a future newsletter bulk provider.
-- **Availability as a committed config file** (`booking/availability.yml`) instead of an admin UI: versioned, no auth surface to build or secure.
+- **Availability as a committed config file** (`booking/config/availability.yml`) instead of an admin UI: versioned, no auth surface to build or secure.
 - **Exposure only through Caddy** (`/api/book/*` on the root domain); no published host ports, per the firewall posture in decision 001.
 
 ## Consequences
