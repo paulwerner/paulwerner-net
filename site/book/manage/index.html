@@ -6,6 +6,8 @@
   <title>Manage Appointment — Paul Werner</title>
   <meta name="description" content="View or cancel your appointment.">
   <meta name="robots" content="noindex">
+  <!-- The manage token rides in the URL; never leak it in a Referer header. -->
+  <meta name="referrer" content="no-referrer">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
