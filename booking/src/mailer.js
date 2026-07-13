@@ -109,7 +109,7 @@ export function createMailer({ config, transport }) {
             locationNote,
             '',
             'The attached invite adds the appointment to your calendar.',
-            `Need to cancel or reschedule? ${manageUrl}`,
+            `Need to cancel or pick another time? ${manageUrl}`,
             '',
             'Talk soon.',
           ].join('\n'),
