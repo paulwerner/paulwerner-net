@@ -1,0 +1,39 @@
+# Owner availability for the /book/ page.
+#
+# All times are wall-clock in `timezone` (DST-safe). Days omitted from
+# `weekly` are unavailable. Changes are picked up on container restart:
+#   docker compose restart booking
+timezone: Europe/Berlin
+
+# Length of a bookable slot.
+slot_duration_minutes: 30
+
+# Required free gap around a slot, relative to busy/booked events.
+buffer_before_minutes: 0
+buffer_after_minutes: 15
+
+# Earliest bookable slot, counted from "now". Also the safety margin against
+# the Proton busy-ICS propagation lag (see decision 002).
+min_notice_hours: 24
+
+# Furthest bookable date, counted from "now".
+max_horizon_days: 30
+
+meeting:
+  # ICS SUMMARY becomes "<title> — <prospect name>".
+  title: "Intro call"
+  location_note: "Video call — a meeting link follows by email before we talk."
+
+weekly:
+  mon:
+    - { start: "10:00", end: "12:00" }
+    - { start: "14:00", end: "17:00" }
+  tue:
+    - { start: "10:00", end: "17:00" }
+  thu:
+    - { start: "10:00", end: "17:00" }
+  fri:
+    - { start: "10:00", end: "13:00" }
+
+# Whole days blocked regardless of `weekly`, as YYYY-MM-DD in `timezone`.
+blocked_dates: []

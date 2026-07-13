@@ -15,8 +15,37 @@ services:
       - ./site:/srv/site:ro
       - caddy_data:/data
       - caddy_config:/config
+    # No depends_on for booking: Caddy resolves upstreams per request, and a
+    # broken booking build must never keep the landing page and blog down.
     depends_on:
       - ghost
+    networks:
+      - web
+
+  booking:
+    build: ./booking
+    restart: unless-stopped
+    environment:
+      BOOKING_PUBLIC_URL: https://${DOMAIN}
+      BOOKING_OWNER_EMAIL: ${BOOKING_OWNER_EMAIL}
+      BOOKING_FROM_ADDRESS: ${BOOKING_FROM_ADDRESS}
+      BOOKING_SMTP_HOST: ${BOOKING_SMTP_HOST}
+      BOOKING_SMTP_PORT: ${BOOKING_SMTP_PORT}
+      BOOKING_SMTP_USER: ${BOOKING_SMTP_USER}
+      BOOKING_SMTP_PASSWORD: ${BOOKING_SMTP_PASSWORD}
+      BOOKING_BUSY_ICS_URL: ${BOOKING_BUSY_ICS_URL}
+      BOOKING_BUSY_TTL_SECONDS: ${BOOKING_BUSY_TTL_SECONDS:-300}
+      BOOKING_RETENTION_DAYS: ${BOOKING_RETENTION_DAYS:-90}
+    volumes:
+      # Mount the directory, not the file: editors that save via rename swap
+      # the inode, and a single-file bind mount would keep serving the old one.
+      - ./booking/config:/app/config:ro
+      - booking_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/book/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     networks:
       - web
 
@@ -76,3 +105,4 @@ volumes:
   caddy_config:
   ghost_content:
   mysql_data:
+  booking_data:
