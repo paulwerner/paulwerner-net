@@ -22,6 +22,8 @@ const busy = createBusySource({
   url: config.busyIcsUrl,
   ttlSeconds: config.busyTtlSeconds,
   horizonDays: config.availability.maxHorizonDays,
+  // All-day busy events are anchored to the owner's calendar day, not UTC.
+  timezone: config.availability.timezone,
 });
 busy.start();
 

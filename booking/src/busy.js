@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ical from 'node-ical';
+import { DateTime } from 'luxon';
 
 async function defaultLoader(url) {
   if (url.startsWith('file://')) {
@@ -11,14 +12,35 @@ async function defaultLoader(url) {
   return res.text();
 }
 
-function expandEvent(event, windowStart, windowEnd) {
-  const durationMs = event.end.getTime() - event.start.getTime();
+// All-day (VALUE=DATE) events are parsed by node-ical as UTC midnight with
+// datetype 'date'. "Busy all of July 10" means the owner's calendar day, not
+// a UTC day, so re-anchor the date to midnight in the owner timezone — else
+// the busy block is shifted by the UTC offset (and can miss/over-cover slots
+// near midnight or in negative-offset zones).
+function zonedDayStart(date, zone) {
+  return DateTime.fromObject(
+    { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() },
+    { zone },
+  ).toJSDate();
+}
+
+function eventBounds(event, zone) {
+  if (event.datetype === 'date') {
+    return { start: zonedDayStart(event.start, zone), end: zonedDayStart(event.end, zone) };
+  }
+  return { start: event.start, end: event.end };
+}
+
+function expandEvent(event, windowStart, windowEnd, zone) {
   if (!event.rrule) {
-    if (event.end > windowStart && event.start < windowEnd) {
-      return [{ start: event.start, end: event.end }];
+    const { start, end } = eventBounds(event, zone);
+    if (end > windowStart && start < windowEnd) {
+      return [{ start, end }];
     }
     return [];
   }
+
+  const durationMs = event.end.getTime() - event.start.getTime();
 
   const exdates = new Set(Object.values(event.exdate ?? {}).map((d) => d.getTime()));
   const overridden = new Set(
@@ -41,12 +63,12 @@ function expandEvent(event, windowStart, windowEnd) {
   return intervals;
 }
 
-function parseBusyIcs(text, windowStart, windowEnd) {
+function parseBusyIcs(text, windowStart, windowEnd, zone) {
   const parsed = ical.sync.parseICS(text);
   const intervals = [];
   for (const item of Object.values(parsed)) {
     if (item.type !== 'VEVENT' || !item.start || !item.end) continue;
-    intervals.push(...expandEvent(item, windowStart, windowEnd));
+    intervals.push(...expandEvent(item, windowStart, windowEnd, zone));
   }
   return intervals;
 }
@@ -62,7 +84,7 @@ const HARD_STALE_LIMIT_MS = 24 * 3600 * 1000;
  * fetch has ever succeeded or the cache is older than the hard stale limit —
  * callers must treat that as "cannot book now".
  */
-export function createBusySource({ url, ttlSeconds, horizonDays, loader = defaultLoader, now = () => new Date() }) {
+export function createBusySource({ url, ttlSeconds, horizonDays, timezone = 'UTC', loader = defaultLoader, now = () => new Date() }) {
   let cache = null;
   let timer = null;
   let inflight = null;
@@ -71,7 +93,7 @@ export function createBusySource({ url, ttlSeconds, horizonDays, loader = defaul
     const text = await loader(url);
     const at = now();
     const windowEnd = new Date(at.getTime() + (horizonDays + 1) * 24 * 3600 * 1000);
-    cache = { intervals: parseBusyIcs(text, at, windowEnd), fetchedAt: at };
+    cache = { intervals: parseBusyIcs(text, at, windowEnd, timezone), fetchedAt: at };
   }
 
   // Concurrent callers share one fetch instead of hammering the Proton link.

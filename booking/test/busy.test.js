@@ -28,6 +28,16 @@ test('parses single events and expands weekly RRULE within the horizon', async (
   assert.ok(!starts.includes('2026-01-01T09:00:00.000Z'));
 });
 
+test('all-day events are anchored to the owner timezone, not UTC', async () => {
+  // The fixture's all-day event is 2026-07-10 (VALUE=DATE). In Europe/Berlin
+  // (UTC+2 in July) that calendar day starts at 2026-07-09T22:00:00Z and ends
+  // at 2026-07-10T22:00:00Z — not the UTC 00:00→00:00 node-ical reports.
+  const intervals = await fixtureSource({ timezone: 'Europe/Berlin' }).getBusyIntervals();
+  const allDay = intervals.find((iv) => iv.start.toISOString() === '2026-07-09T22:00:00.000Z');
+  assert.ok(allDay, 'all-day busy block missing or not anchored to Berlin midnight');
+  assert.equal(allDay.end.toISOString(), '2026-07-10T22:00:00.000Z');
+});
+
 test('fails closed when no fetch has ever succeeded', async () => {
   const source = fixtureSource({ loader: async () => { throw new Error('boom'); } });
   await assert.rejects(() => source.getBusyIntervals(), /boom/);
