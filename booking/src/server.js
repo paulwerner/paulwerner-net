@@ -236,7 +236,15 @@ const server = app.listen(config.port, () => {
 for (const signal of ['SIGTERM', 'SIGINT']) {
   process.on(signal, () => {
     busy.stop();
-    server.close(() => process.exit(0));
+    server.close(() => {
+      // Checkpoint the WAL and release the file cleanly once connections drain.
+      try {
+        db.close();
+      } catch (err) {
+        console.error('db close failed:', err.message);
+      }
+      process.exit(0);
+    });
     // Docker's stop timeout is the real backstop; this keeps shutdown prompt.
     setTimeout(() => process.exit(0), 5000).unref();
   });
