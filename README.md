@@ -4,7 +4,7 @@ Content infrastructure for paulwerner.net — a static landing page at the root 
 
 ## Architecture
 
-A single VPS (Hetzner CAX11 in Nuremberg, Ubuntu 24.04 ARM64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 5** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
+A single VPS (Hetzner CX23 in Nuremberg, Ubuntu 24.04 on x86_64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 5** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
 
 ## Local development
 
