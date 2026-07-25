@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import ejs from 'ejs';
 
 import { pages, navPages, pagePath, pageUrl } from './src/data/pages.js';
+import { assertContrast, AA_TEXT, AA_UI } from './scripts/contrast-report.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src');
@@ -134,6 +135,14 @@ ${urls}
   console.log(`  sitemap site/sitemap.xml (${pages.length} urls)`);
 }
 
+// Contrast is a shipped promise (/accessibility/ declares WCAG 2.1 AA), and the
+// tightest pair has 0.15 of margin — thin enough to cross on a token edit that
+// looks harmless. Run `npm run contrast` for the full table.
+function assertPaletteContrast() {
+  assertContrast();
+  console.log(`  assert contrast (text >= ${AA_TEXT.toFixed(1)}, ui/focus >= ${AA_UI.toFixed(1)})`);
+}
+
 // The skip link is invisible until focused, so a missing sr-only utility is
 // invisible to accessibility linters and shows up only as stray text at the top
 // of every page. Cheap to assert, expensive to notice.
@@ -180,6 +189,7 @@ function build() {
   copyFonts();
   copyStatic();
   writeSitemap();
+  assertPaletteContrast();
   assertCriticalUtilities();
   assertCaddyPlaceholders();
   console.log('done');
