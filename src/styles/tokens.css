@@ -22,9 +22,17 @@
   --color-muted: #8a8478;
   --color-border: #2a2420;
 
-  --font-typewriter: "TravelingTypewriter", "Special Elite", monospace;
+  /* Special Elite was the prototype stand-in for TravelingTypewriter (see
+   * docs/brand/brand-guidelines.md). TravelingTypewriter is self-hosted here,
+   * so the stand-in is dead weight and the fallback is the system monospace. */
+  --font-typewriter: "TravelingTypewriter", ui-monospace, monospace;
   --font-serif: "Source Serif 4", Georgia, serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* System stack on purpose. The brand's code face is JetBrains Mono, but no
+   * page here renders code, so shipping it would be dead weight — it is
+   * declared in the Ghost theme instead, where code blocks actually live.
+   * Tailwind's preflight points code/kbd/pre at this variable, so it must not
+   * name a face this origin does not serve. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --shadow-card: 9px 8px 11px -4px rgba(0, 0, 0, 0.3);
 

@@ -12,6 +12,8 @@
     "verify:no-third-party": "grep -rEn \"googleapis|gstatic|cdn\\.tailwindcss|jsdelivr\" site/ ghost-theme/ --include='*.html' --include='*.css' --include='*.hbs' && echo 'FAIL: third-party references found' && exit 1 || echo 'PASS: no third-party references in served HTML/CSS/hbs'"
   },
   "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.0",
     "@tailwindcss/cli": "^4.3.3",
     "ejs": "^3.1.10",
     "tailwindcss": "^4.3.3"

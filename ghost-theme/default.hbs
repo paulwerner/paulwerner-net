@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{meta_title}}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+    {{!-- Fonts are self-hosted in this theme (assets/fonts). No third-party
+          request leaves the blog; the @font-face declarations live in
+          theme.css. Preload only what the first screen renders. --}}
+    <link rel="preload" href="{{asset "fonts/TravelingTypewriter.woff2"}}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{asset "fonts/source-serif-4-latin-400-normal.woff2"}}" as="font" type="font/woff2" crossorigin>
 
     <link rel="stylesheet" href="{{asset "css/theme.css"}}">
     <link rel="stylesheet" href="{{asset "css/prism.css"}}">

@@ -65,9 +65,40 @@ function copyAssets() {
   const from = path.join(SRC, 'assets');
   const to = path.join(OUT, 'assets');
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
-    fs.cpSync(path.join(from, entry.name), path.join(to, entry.name), { recursive: true });
+    fs.cpSync(path.join(from, entry.name), path.join(to, entry.name), {
+      recursive: true,
+      // TravelingTypewriter.otf is the source of truth for the woff2 beside it;
+      // only the web format ships.
+      filter: (src) => !src.endsWith('.otf'),
+    });
   }
   console.log(`  assets ${path.relative(ROOT, to)}`);
+}
+
+// Self-hosted web fonts, copied from the @fontsource packages so the shipped
+// files always match the pinned dependency. Only faces something actually
+// renders are listed — see docs/decisions/002 for the per-face evidence.
+const FONTSOURCE = [
+  ['@fontsource/source-serif-4', 'source-serif-4-latin-400-normal.woff2'],
+  ['@fontsource/source-serif-4', 'source-serif-4-latin-400-italic.woff2'],
+  ['@fontsource/source-serif-4', 'source-serif-4-latin-600-normal.woff2'],
+  ['@fontsource/source-serif-4', 'source-serif-4-latin-700-normal.woff2'],
+];
+
+function copyFonts() {
+  const to = path.join(OUT, 'assets', 'fonts');
+  fs.mkdirSync(to, { recursive: true });
+  for (const [pkg, file] of FONTSOURCE) {
+    fs.copyFileSync(path.join(ROOT, 'node_modules', pkg, 'files', file), path.join(to, file));
+  }
+  // OFL licence texts ship next to the fonts they cover.
+  const licenses = path.join(to, 'licenses');
+  fs.mkdirSync(licenses, { recursive: true });
+  for (const pkg of new Set(FONTSOURCE.map(([p]) => p))) {
+    const name = `${pkg.split('/')[1]}-OFL.txt`;
+    fs.copyFileSync(path.join(ROOT, 'node_modules', pkg, 'LICENSE'), path.join(licenses, name));
+  }
+  console.log(`  fonts  ${FONTSOURCE.length} woff2 + licences`);
 }
 
 
@@ -84,11 +115,21 @@ function assertCaddyPlaceholders() {
   console.log('  assert Caddy imprint placeholders intact');
 }
 
+// Directories the build owns outright. Clearing them keeps stale output (a
+// renamed asset, a font format that no longer ships) from lingering in site/.
+function cleanGenerated() {
+  for (const dir of ['assets/css', 'assets/fonts']) {
+    fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });
+  }
+}
+
 function build() {
   console.log('building site/');
+  cleanGenerated();
   renderPages();
   buildCss();
   copyAssets();
+  copyFonts();
   assertCaddyPlaceholders();
   console.log('done');
 }
