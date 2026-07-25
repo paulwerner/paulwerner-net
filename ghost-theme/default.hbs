@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{meta_title}}</title>
 
+    {{!-- Icons ship with the theme. They sit before {{ghost_head}} on purpose:
+          if a publication icon is uploaded in Admin, Ghost's own link comes
+          later and wins, so the setting still overrides the theme default. --}}
+    <link rel="icon" href="{{asset "icons/favicon.ico"}}" sizes="32x32">
+    <link rel="icon" href="{{asset "icons/favicon-32x32.png"}}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{{asset "icons/favicon-16x16.png"}}" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="{{asset "icons/apple-touch-icon.png"}}">
+
     {{!-- Fonts are self-hosted in this theme (assets/fonts). No third-party
           request leaves the blog; the @font-face declarations live in
           theme.css. Preload only what the first screen renders. --}}
