@@ -9,8 +9,11 @@
 @import "tailwindcss" source(none);
 @import "./tokens.css";
 
-@source "../pages";
-@source "../partials";
+/* One directive covering all hand-written source. Listing template
+ * directories individually is a trap: adding a directory (or moving markup
+ * into layouts/, as the skip link was) silently drops its classes from the
+ * build. */
+@source "../";
 
 /* ---- Fonts ----
  *

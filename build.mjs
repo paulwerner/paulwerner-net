@@ -134,6 +134,22 @@ ${urls}
   console.log(`  sitemap site/sitemap.xml (${pages.length} urls)`);
 }
 
+// The skip link is invisible until focused, so a missing sr-only utility is
+// invisible to accessibility linters and shows up only as stray text at the top
+// of every page. Cheap to assert, expensive to notice.
+function assertCriticalUtilities() {
+  const css = fs.readFileSync(path.join(OUT, 'assets', 'css', 'main.css'), 'utf8');
+  for (const utility of ['.sr-only', 'not-sr-only']) {
+    if (!css.includes(utility)) {
+      throw new Error(
+        `Compiled CSS is missing the ${utility} utility — the skip link would render as visible text. ` +
+          'Check the @source directives in src/styles/main.css.',
+      );
+    }
+  }
+  console.log('  assert skip-link utilities present');
+}
+
 function assertCaddyPlaceholders() {
   const imprint = fs.readFileSync(path.join(OUT, 'imprint', 'index.html'), 'utf8');
   for (const placeholder of CADDY_PLACEHOLDERS) {
@@ -164,6 +180,7 @@ function build() {
   copyFonts();
   copyStatic();
   writeSitemap();
+  assertCriticalUtilities();
   assertCaddyPlaceholders();
   console.log('done');
 }
