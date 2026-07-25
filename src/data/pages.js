@@ -46,6 +46,16 @@ export const pages = [
     updated: '2026-07-25',
     priority: '0.3',
   },
+  {
+    slug: 'accessibility',
+    file: 'accessibility.ejs',
+    title: 'Accessibility — Paul Werner',
+    description:
+      'Accessibility statement for paulwerner.net: WCAG 2.1 AA conformance, known limitations, and how to report a barrier.',
+    navLabel: 'Accessibility',
+    updated: '2026-07-25',
+    priority: '0.3',
+  },
 ];
 
 export const navPages = pages.filter((page) => page.navLabel);

@@ -94,13 +94,27 @@
     box-sizing: border-box;
 }
 
+/* The scrollbar used to be hidden outright. It is the only persistent
+   indicator of scroll position and document length, so it is styled to match
+   the palette rather than suppressed. */
 html {
     background: var(--bg);
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--hover) var(--bg);
 }
 
 html::-webkit-scrollbar {
-    display: none;
+    width: 10px;
+    height: 10px;
+}
+
+html::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+html::-webkit-scrollbar-thumb {
+    background: var(--hover);
+    border-radius: 5px;
 }
 
 body {
@@ -234,6 +248,38 @@ hr {
 .post-template .site-main,
 .page-template .site-main {
     max-width: var(--content-width);
+}
+
+/* Visible only when focused: the first tab stop on every page jumps past the
+   navigation straight to the content. */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 10px 14px;
+    background: var(--bg);
+    color: var(--link);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+}
+
+.skip-link:focus {
+    left: 12px;
+    top: 12px;
+}
+
+/* Available to assistive technology, removed from the visual layout. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .site-header {

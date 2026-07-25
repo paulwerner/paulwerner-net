@@ -62,21 +62,52 @@
 
 /* ---- Base ---- */
 
+/* The scrollbar used to be hidden outright (scrollbar-width: none). That
+ * removes the only persistent indicator of scroll position and length, which
+ * people relying on magnification or coarse pointers depend on — so it is
+ * styled to match the palette instead of suppressed. */
 html {
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hover) var(--color-bg);
 }
 
 html::-webkit-scrollbar {
-  display: none;
+  width: 10px;
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: var(--color-hover);
+  border-radius: 5px;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+/* Focus must be visible on every interactive element, including content links
+ * that carry no focus utility classes of their own. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

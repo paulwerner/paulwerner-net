@@ -32,10 +32,12 @@
 
         <p class="font-typewriter text-[14px] sm:text-base uppercase tracking-[4px] text-text mt-3">{ SOFTWARE ENGINEER }</p>
 
-        <blockquote class="font-serif text-[15px] italic text-text max-w-[480px] mx-auto mt-6 leading-relaxed">
-          Einstein's Three Rules of Work: Out of clutter find simplicity. From discord find harmony. In the middle of difficulty lies opportunity.
-        </blockquote>
-        <cite class="block font-typewriter text-[13px] tracking-[1px] text-hover not-italic mt-3">— John Archibald Wheeler</cite>
+        <figure class="mt-6">
+          <blockquote class="font-serif text-[15px] italic text-text max-w-[480px] mx-auto leading-relaxed">
+            Einstein's Three Rules of Work: Out of clutter find simplicity. From discord find harmony. In the middle of difficulty lies opportunity.
+          </blockquote>
+          <figcaption class="font-typewriter text-[13px] tracking-[1px] text-hover mt-3"><cite class="not-italic">— John Archibald Wheeler</cite></figcaption>
+        </figure>
       </div>
 
       <a id="scroll-indicator" href="#about" class="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
@@ -99,9 +101,12 @@
     }, { threshold: 0.1 }).observe(card);
 
     const indicator = document.getElementById('scroll-indicator');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     indicator.addEventListener('click', (ev) => {
       ev.preventDefault();
-      document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('about').scrollIntoView({
+        behavior: reduceMotion.matches ? 'auto' : 'smooth',
+      });
     });
 
     const FADE_DISTANCE = 200;
@@ -196,6 +201,7 @@
         <a href="/imprint/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Imprint</a>
         <a href="/privacy/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Privacy</a>
         <a href="/disclaimer/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Disclaimer</a>
+        <a href="/accessibility/" class="font-typewriter text-[13px] tracking-[0.5px] text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm">Accessibility</a>
       </nav>
 
       <div class="flex items-center justify-center gap-5">
