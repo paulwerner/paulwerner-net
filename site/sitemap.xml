@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERATED FILE — do not edit. Source: src/data/pages.js — rebuild with `npm run build`. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://paulwerner.net/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://paulwerner.net/imprint/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://paulwerner.net/privacy/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://paulwerner.net/disclaimer/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://paulwerner.net/accessibility/</loc>
+    <lastmod>2026-07-25</lastmod>
+    <priority>0.3</priority>
+  </url>
+</urlset>

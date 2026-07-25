@@ -15,7 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ejs from 'ejs';
 
-import { pages, navPages, pagePath } from './src/data/pages.js';
+import { pages, navPages, pagePath, pageUrl } from './src/data/pages.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src');
@@ -102,6 +102,38 @@ function copyFonts() {
 }
 
 
+// Files served from the site root rather than /assets (robots.txt today).
+function copyStatic() {
+  const from = path.join(SRC, 'static');
+  for (const entry of fs.readdirSync(from)) {
+    fs.copyFileSync(path.join(from, entry), path.join(OUT, entry));
+    console.log(`  static site/${entry}`);
+  }
+}
+
+function writeSitemap() {
+  const urls = pages
+    .map(
+      (page) => `  <url>
+    <loc>${pageUrl(page)}</loc>
+    <lastmod>${page.updated}</lastmod>
+    <priority>${page.priority}</priority>
+  </url>`,
+    )
+    .join('\n');
+
+  // lastmod comes from src/data/pages.js rather than the clock or the file
+  // system, so a rebuild without content changes produces an identical file.
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERATED FILE — do not edit. Source: src/data/pages.js — rebuild with \`npm run build\`. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`;
+  fs.writeFileSync(path.join(OUT, 'sitemap.xml'), xml);
+  console.log(`  sitemap site/sitemap.xml (${pages.length} urls)`);
+}
+
 function assertCaddyPlaceholders() {
   const imprint = fs.readFileSync(path.join(OUT, 'imprint', 'index.html'), 'utf8');
   for (const placeholder of CADDY_PLACEHOLDERS) {
@@ -130,6 +162,8 @@ function build() {
   buildCss();
   copyAssets();
   copyFonts();
+  copyStatic();
+  writeSitemap();
   assertCaddyPlaceholders();
   console.log('done');
 }
