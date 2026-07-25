@@ -1,0 +1,77 @@
+/* Stylesheet entry point. Compiled by the Tailwind CLI to
+ * site/assets/css/main.css — see build.mjs.
+ *
+ * Automatic source detection is disabled (source(none)) so the scan covers the
+ * hand-written templates only: the generated files under site/ and the prose in
+ * docs/ must never influence which utilities are emitted.
+ */
+
+@import "tailwindcss" source(none);
+@import "./tokens.css";
+
+@source "../pages";
+@source "../partials";
+
+/* ---- Fonts ---- */
+
+@font-face {
+  font-family: "TravelingTypewriter";
+  src: url("/assets/fonts/TravelingTypewriter.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---- Base ---- */
+
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* ---- Hero ---- */
+
+.hero-bg {
+  background-image:
+    linear-gradient(
+      to bottom,
+      rgba(15, 11, 7, 0) 0%,
+      rgba(15, 11, 7, 0.15) 50%,
+      rgba(15, 11, 7, 1) 100%
+    ),
+    url("/assets/background.png");
+  background-size: auto, contain;
+  background-position: top center, top center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: scroll, fixed;
+}
+
+@media (max-width: 640px) {
+  .hero-bg {
+    background-attachment: scroll, scroll;
+  }
+}
+
+.hero-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+}

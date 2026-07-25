@@ -1,0 +1,19 @@
+{
+  "name": "paulwerner-net",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static build for the paulwerner.net landing and legal pages",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "contrast": "node scripts/contrast-report.mjs",
+    "verify:no-third-party": "grep -rEn \"googleapis|gstatic|cdn\\.tailwindcss|jsdelivr\" site/ ghost-theme/ --include='*.html' --include='*.css' --include='*.hbs' && echo 'FAIL: third-party references found' && exit 1 || echo 'PASS: no third-party references in served HTML/CSS/hbs'"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "ejs": "^3.1.10",
+    "tailwindcss": "^4.3.3"
+  }
+}

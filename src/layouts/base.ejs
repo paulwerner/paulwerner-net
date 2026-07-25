@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= page.title %></title>
+  <meta name="description" content="<%= page.description %>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body class="bg-bg text-text font-serif antialiased min-h-screen flex flex-col">
+
+<%- body %>
+
+<%- include('../partials/footer.ejs', { page: page, navPages: navPages }) %>
+
+  <script>
+    document.querySelectorAll('[data-year]').forEach((el) => {
+      el.textContent = new Date().getFullYear();
+    });
+
+    (() => {
+      const back = document.getElementById('back-link');
+      if (!back) return;
+      try {
+        const ref = document.referrer && new URL(document.referrer);
+        if (ref && /^blog\./.test(ref.hostname)) {
+          back.href = ref.origin + '/';
+          const label = back.querySelector('[data-back-label]');
+          if (label) label.innerHTML = '&larr; Back to blog';
+        }
+      } catch (_) {}
+    })();
+  </script>
+
+</body>
+</html>
