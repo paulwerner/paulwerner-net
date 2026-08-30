@@ -1,16 +1,8 @@
 #!/usr/bin/env node
-// Contrast gate for the brand palette.
-//
-// Parses the colours straight out of src/styles/tokens.css — the same file
-// Tailwind compiles — so the ratios checked here are provably the ratios that
-// ship, not a copy that can drift.
-//
-// This is a gate, not a report: `npm run build` calls assertContrast() and
-// fails if any text pair drops below WCAG AA (4.5:1) or any UI/focus pair
-// below 3:1. The margins are thin — `muted` on `inset-bg` sits at 4.65 — so a
-// token edit that looks harmless can cross the line without anyone noticing.
-//
-// Usage: npm run contrast   (prints the full table; exits non-zero on failure)
+// WCAG contrast gate for the brand palette, parsed straight out of
+// src/styles/tokens.css so the checked ratios cannot drift from the shipped
+// ones. `npm run build` calls assertContrast(); `npm run contrast` prints the
+// full table.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,10 +14,8 @@ const TOKENS = path.join(ROOT, 'src', 'styles', 'tokens.css');
 export const AA_TEXT = 4.5;
 export const AA_UI = 3.0;
 
-// Exempt by name, with the reason stated. `border` is used for dividers and
-// for inactive card outlines that also carry a background shift, so it is
-// never the sole indicator of a control or of text — WCAG 1.4.3 and 1.4.11 do
-// not apply to it. Anything added here needs the same justification.
+// Tokens exempt from the gate, by name, each with its reason. `border` is
+// never the sole indicator of text or a control, so 1.4.3/1.4.11 do not apply.
 export const DECORATIVE = {
   border: 'dividers and inactive card outlines that also carry a background shift',
 };
@@ -33,8 +23,7 @@ export const DECORATIVE = {
 const BACKGROUNDS = ['bg', 'card-bg', 'inset-bg'];
 const FOREGROUNDS = ['text', 'link', 'gold', 'accent', 'hover', 'muted', 'border'];
 
-// Pairs whose role is not body text, checked against the 3:1 non-text
-// threshold, plus the two filled controls, which are text.
+// Non-text pairs at the 3:1 threshold, plus the two filled controls (text).
 const NAMED_PAIRS = [
   { label: 'accent button: bg text on accent fill', a: 'bg', b: 'accent', threshold: AA_TEXT },
   { label: 'accent button hover: bg text on gold fill', a: 'bg', b: 'gold', threshold: AA_TEXT },

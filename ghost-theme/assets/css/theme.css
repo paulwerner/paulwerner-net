@@ -1,8 +1,5 @@
-/* All faces are served from this theme: no Google Fonts, no CDN, no request
- * leaves the blog. Only faces the templates and prism.css actually render are
- * declared — JetBrains Mono covers `code`/`pre` (400), Prism's comment and
- * italic tokens (400 italic) and its bold tokens (700). Licences live in
- * ../fonts/licenses/. */
+/* All faces self-hosted from ../fonts/ (licences in ../fonts/licenses/); only
+ * faces the templates and prism.css actually render are declared. */
 
 @font-face {
     font-family: "TravelingTypewriter";
@@ -94,9 +91,8 @@
     box-sizing: border-box;
 }
 
-/* The scrollbar used to be hidden outright. It is the only persistent
-   indicator of scroll position and document length, so it is styled to match
-   the palette rather than suppressed. */
+/* Styled, not hidden: the scrollbar is the only persistent indicator of
+   scroll position and length. */
 html {
     background: var(--bg);
     scrollbar-width: thin;
@@ -250,8 +246,7 @@ hr {
     max-width: var(--content-width);
 }
 
-/* Visible only when focused: the first tab stop on every page jumps past the
-   navigation straight to the content. */
+/* Visible only when focused; first tab stop on every page. */
 .skip-link {
     position: absolute;
     left: -9999px;
@@ -269,7 +264,7 @@ hr {
     top: 12px;
 }
 
-/* Available to assistive technology, removed from the visual layout. */
+/* Exposed to assistive technology, removed from the visual layout. */
 .sr-only {
     position: absolute;
     width: 1px;

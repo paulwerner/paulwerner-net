@@ -1,12 +1,6 @@
 #!/usr/bin/env node
-// Static build for the landing and legal pages.
-//
-//   src/  hand-written source (EJS templates, Tailwind entry, assets)
-//   site/ generated output, committed to git and bind-mounted into Caddy
-//
-// The production server only runs `git pull` — nothing is compiled there — so
-// site/ must always be committed in sync with src/.
-//
+// Static build: src/ (hand-written) -> site/ (generated, committed, served).
+// The production server only runs `git pull`, so site/ must stay in sync.
 // Usage: npm run build   (npm run dev for watch mode)
 
 import { execFileSync } from 'node:child_process';
@@ -22,9 +16,8 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src');
 const OUT = path.join(ROOT, 'site');
 
-// Caddy renders these at request time via the `templates` directive (scoped to
-// /imprint/*). EJS uses <% %>, so {{ }} passes through untouched — this build
-// asserts that byte-for-byte rather than trusting it.
+// Caddy renders these at request time via the `templates` directive; they must
+// survive EJS templating byte-for-byte.
 const CADDY_PLACEHOLDERS = ['{{env "IMPRINT_STREET"}}', '{{env "IMPRINT_CITY"}}'];
 
 const banner = (page) =>
@@ -68,17 +61,15 @@ function copyAssets() {
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     fs.cpSync(path.join(from, entry.name), path.join(to, entry.name), {
       recursive: true,
-      // TravelingTypewriter.otf is the source of truth for the woff2 beside it;
-      // only the web format ships.
+      // .otf is the source for the woff2 beside it; only the web format ships.
       filter: (src) => !src.endsWith('.otf'),
     });
   }
   console.log(`  assets ${path.relative(ROOT, to)}`);
 }
 
-// Self-hosted web fonts, copied from the @fontsource packages so the shipped
-// files always match the pinned dependency. Only faces something actually
-// renders are listed — see docs/decisions/002 for the per-face evidence.
+// Copied from the pinned @fontsource packages. Only faces the pages actually
+// render are listed — see docs/decisions/002.
 const FONTSOURCE = [
   ['@fontsource/source-serif-4', 'source-serif-4-latin-400-normal.woff2'],
   ['@fontsource/source-serif-4', 'source-serif-4-latin-400-italic.woff2'],
@@ -102,8 +93,7 @@ function copyFonts() {
   console.log(`  fonts  ${FONTSOURCE.length} woff2 + licences`);
 }
 
-
-// Files served from the site root rather than /assets (robots.txt today).
+// Files served from the site root rather than /assets (robots.txt, favicons).
 function copyStatic() {
   const from = path.join(SRC, 'static');
   for (const entry of fs.readdirSync(from)) {
@@ -123,8 +113,7 @@ function writeSitemap() {
     )
     .join('\n');
 
-  // lastmod comes from src/data/pages.js rather than the clock or the file
-  // system, so a rebuild without content changes produces an identical file.
+  // lastmod comes from the registry, not the clock, so rebuilds are byte-stable.
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- GENERATED FILE — do not edit. Source: src/data/pages.js — rebuild with \`npm run build\`. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -135,17 +124,15 @@ ${urls}
   console.log(`  sitemap site/sitemap.xml (${pages.length} urls)`);
 }
 
-// Contrast is a shipped promise (/accessibility/ declares WCAG 2.1 AA), and the
-// tightest pair has 0.15 of margin — thin enough to cross on a token edit that
-// looks harmless. Run `npm run contrast` for the full table.
+// /accessibility/ declares WCAG 2.1 AA, and the tightest pair has little
+// margin. Run `npm run contrast` for the full table.
 function assertPaletteContrast() {
   assertContrast();
   console.log(`  assert contrast (text >= ${AA_TEXT.toFixed(1)}, ui/focus >= ${AA_UI.toFixed(1)})`);
 }
 
-// The skip link is invisible until focused, so a missing sr-only utility is
-// invisible to accessibility linters and shows up only as stray text at the top
-// of every page. Cheap to assert, expensive to notice.
+// A missing sr-only utility renders the skip link as visible text — invisible
+// to accessibility linters, so it is asserted here.
 function assertCriticalUtilities() {
   const css = fs.readFileSync(path.join(OUT, 'assets', 'css', 'main.css'), 'utf8');
   for (const utility of ['.sr-only', 'not-sr-only']) {
@@ -172,8 +159,7 @@ function assertCaddyPlaceholders() {
   console.log('  assert Caddy imprint placeholders intact');
 }
 
-// Directories the build owns outright. Clearing them keeps stale output (a
-// renamed asset, a font format that no longer ships) from lingering in site/.
+// Clear directories the build owns outright so stale output cannot linger.
 function cleanGenerated() {
   for (const dir of ['assets/css', 'assets/fonts']) {
     fs.rmSync(path.join(OUT, dir), { recursive: true, force: true });

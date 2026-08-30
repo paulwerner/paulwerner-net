@@ -1,14 +1,8 @@
-/* Brand tokens — the single definition for the landing and legal pages.
- *
- * Tailwind v4 turns every entry below into both a utility class and a real CSS
- * custom property (--color-accent, --font-serif, …), so hand-written rules in
- * main.css reference the same values without a second copy. scripts/contrast-
- * report.mjs parses this file, so the reported ratios are provably the shipped
- * ones. Values mirror docs/brand/brand-guidelines.md.
- *
- * Note: ghost-theme/assets/css/theme.css keeps its own :root block — the Ghost
- * theme is hand-written and deliberately independent of this build.
- */
+/* Brand tokens (see docs/brand/brand-guidelines.md) — the single definition
+ * for the landing and legal pages. Tailwind's @theme emits each entry as both
+ * a utility class and a CSS custom property; scripts/contrast-report.mjs
+ * parses this file directly. ghost-theme/assets/css/theme.css keeps its own
+ * :root copy by design (docs/decisions/002). */
 
 @theme {
   --color-bg: #0f0b07;
@@ -22,16 +16,10 @@
   --color-muted: #8a8478;
   --color-border: #2a2420;
 
-  /* Special Elite was the prototype stand-in for TravelingTypewriter (see
-   * docs/brand/brand-guidelines.md). TravelingTypewriter is self-hosted here,
-   * so the stand-in is dead weight and the fallback is the system monospace. */
   --font-typewriter: "TravelingTypewriter", ui-monospace, monospace;
   --font-serif: "Source Serif 4", Georgia, serif;
-  /* System stack on purpose. The brand's code face is JetBrains Mono, but no
-   * page here renders code, so shipping it would be dead weight — it is
-   * declared in the Ghost theme instead, where code blocks actually live.
-   * Tailwind's preflight points code/kbd/pre at this variable, so it must not
-   * name a face this origin does not serve. */
+  /* System stack on purpose: preflight points code/kbd/pre here, and no page
+   * on this origin serves JetBrains Mono (the Ghost theme does). */
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --shadow-card: 9px 8px 11px -4px rgba(0, 0, 0, 0.3);
