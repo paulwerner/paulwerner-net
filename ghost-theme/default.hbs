@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{meta_title}}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+    {{!-- Before {{ghost_head}} so a publication icon uploaded in Admin wins. --}}
+    <link rel="icon" href="{{asset "icons/favicon.ico"}}" sizes="32x32">
+    <link rel="icon" href="{{asset "icons/favicon-32x32.png"}}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{{asset "icons/favicon-16x16.png"}}" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="{{asset "icons/apple-touch-icon.png"}}">
+
+    {{!-- Self-hosted fonts (@font-face in theme.css); preload only what the
+          first screen renders. --}}
+    <link rel="preload" href="{{asset "fonts/TravelingTypewriter.woff2"}}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{asset "fonts/source-serif-4-latin-400-normal.woff2"}}" as="font" type="font/woff2" crossorigin>
 
     <link rel="stylesheet" href="{{asset "css/theme.css"}}">
     <link rel="stylesheet" href="{{asset "css/prism.css"}}">
@@ -15,9 +22,11 @@
     {{ghost_head}}
 </head>
 <body class="{{body_class}}">
+    <a class="skip-link" href="#main">Skip to content</a>
+
     {{> "navigation"}}
 
-    <main class="site-main">
+    <main id="main" class="site-main">
         {{{body}}}
     </main>
 

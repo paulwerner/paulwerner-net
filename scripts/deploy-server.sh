@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Idempotent server provisioning for paulwerner.net on Ubuntu 24.04 (ARM64).
-# Run as root on a fresh Hetzner CAX11. Safe to re-run.
+# Idempotent server provisioning for paulwerner.net on Ubuntu 24.04 (x86_64).
+# Run as root on a fresh Hetzner CX23. Safe to re-run.
 #
 # Usage:
 #   scp scripts/deploy-server.sh root@<server>:/root/

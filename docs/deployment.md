@@ -7,9 +7,9 @@ How to provision the production VPS and deploy paulwerner.net for the first time
 | Detail | Value |
 |--------|-------|
 | Provider | Hetzner Cloud |
-| Plan | CAX11 (ARM/Ampere, 2 vCPU, 4 GB RAM) |
+| Plan | CX23 (x86/Intel Xeon, 2 vCPU, 4 GB RAM, 40 GB NVMe, 20 TB traffic) |
 | Location | Nuremberg (NBG-1) |
-| OS | Ubuntu 24.04 LTS (aarch64) |
+| OS | Ubuntu 24.04 LTS (x86_64) |
 | Public IPv4 | `178.105.43.46` |
 | App directory | `/opt/paulwerner-net` |
 
@@ -95,6 +95,7 @@ What to do after `git pull`, depending on what changed:
 | Changed | Action |
 |---------|--------|
 | `site/` only (landing or legal pages) | Nothing — Caddy serves from the bind mount |
+| `src/` (page source, styles, tokens) | Run `npm run build` **locally** and commit the regenerated `site/` alongside the source; the server never builds |
 | `Caddyfile` | `docker compose restart caddy` |
 | `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme) |
 | `docker-compose.yml` or `.env` | `docker compose up -d` |

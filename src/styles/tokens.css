@@ -1,0 +1,39 @@
+/* Brand tokens (see docs/brand/brand-guidelines.md) — the single definition
+ * for the landing and legal pages. Tailwind's @theme emits each entry as both
+ * a utility class and a CSS custom property; scripts/contrast-report.mjs
+ * parses this file directly. ghost-theme/assets/css/theme.css keeps its own
+ * :root copy by design (docs/decisions/002). */
+
+@theme {
+  --color-bg: #0f0b07;
+  --color-card-bg: #161210;
+  --color-inset-bg: #1e1a16;
+  --color-accent: #be884b;
+  --color-text: #d8d6cf;
+  --color-link: #f4e4c0;
+  --color-gold: #f3ca84;
+  --color-hover: #ae8d67;
+  --color-muted: #8a8478;
+  --color-border: #2a2420;
+
+  --font-typewriter: "TravelingTypewriter", ui-monospace, monospace;
+  --font-serif: "Source Serif 4", Georgia, serif;
+  /* System stack on purpose: preflight points code/kbd/pre here, and no page
+   * on this origin serves JetBrains Mono (the Ghost theme does). */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --shadow-card: 9px 8px 11px -4px rgba(0, 0, 0, 0.3);
+
+  --animate-hero-in: hero-in 0.6s ease-out both;
+
+  @keyframes hero-in {
+    0% {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
