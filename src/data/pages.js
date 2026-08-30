@@ -15,8 +15,8 @@ export const pages = [
     file: 'index.ejs',
     title: 'Paul Werner — Software Engineer',
     description:
-      'Paul Werner — software engineer based in Berlin. Systems, craft, and quiet engineering.',
-    updated: '2026-07-25',
+      'Paul Werner — software engineer based in Hamburg. Systems, craft, and quiet engineering.',
+    updated: '2026-08-30',
     priority: '1.0',
   },
   {
