@@ -69,7 +69,7 @@ function copyAssets() {
 }
 
 // Copied from the pinned @fontsource packages. Only faces the pages actually
-// render are listed — see docs/decisions/002.
+// render are listed — see docs/learnings/004.
 const FONTSOURCE = [
   ['@fontsource/source-serif-4', 'source-serif-4-latin-400-normal.woff2'],
   ['@fontsource/source-serif-4', 'source-serif-4-latin-400-italic.woff2'],
