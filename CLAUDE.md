@@ -7,7 +7,7 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 ## Tech Stack
 
 - **Landing page**: Plain HTML + Tailwind CSS loaded via the Tailwind Play CDN (no build step; a CLI build step can be introduced later if fidelity or offline use demands it)
-- **Blog engine**: Ghost 5 (official `ghost:5-alpine` image)
+- **Blog engine**: Ghost 6 (official `ghost:6-alpine` image, Node.js 22)
 - **Database**: MySQL 8 (Ghost's recommended database)
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
 - **Container orchestration**: Docker Compose

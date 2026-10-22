@@ -98,6 +98,20 @@ What to do after `git pull`, depending on what changed:
 | `Caddyfile` | `docker compose restart caddy` |
 | `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme) |
 | `docker-compose.yml` or `.env` | `docker compose up -d` |
+| Nothing — upstream security release (e.g. Node.js, MySQL, Caddy) | `docker compose pull && docker compose up -d` (`up -d` alone keeps the cached image for an unchanged tag) |
+
+### Major Ghost upgrades
+
+Ghost's database migrations are one-way, so take a backup before changing the major version tag (for example `ghost:5-alpine` → `ghost:6-alpine`):
+
+```bash
+docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump -uroot --single-transaction "$MYSQL_DATABASE"' > ghost-$(date +%F).sql
+docker run --rm -v paulwerner-net_ghost_content:/c -v "$PWD":/b alpine tar czf /b/ghost-content-$(date +%F).tgz -C /c .
+docker compose pull ghost && docker compose up -d ghost
+docker compose logs -f ghost   # wait for "Ghost booted"
+```
+
+Then confirm the runtime with `docker compose exec ghost node -v`, and check that the `paulwerner` theme is still active under Settings → Design.
 
 ## Verification checklist
 
