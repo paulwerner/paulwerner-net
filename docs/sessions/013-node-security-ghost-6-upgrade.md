@@ -35,11 +35,11 @@ The theme needed no changes. `gscan --v6` reports no errors, and the one existin
 
 ## Commits
 
-1. `2dcfdc8` — `docs: add session 013 plan (Node.js security release, Ghost 6 upgrade)`
-2. `f0065a6` — `fix(ghost): upgrade to ghost:6-alpine for Node.js Oct 2026 security fixes`
-3. `ca2ff56` — `docs: reflect Ghost 6 and document image refresh + major upgrade steps`
-4. `7eea330` — `docs: add decision 002 (upgrade to Ghost 6)`
-5. `00d8ed1` — `docs: add learning 004 (EOL major tags stop receiving runtime patches)`
+1. `6bfb039` — `docs: add session 013 plan (Node.js security release, Ghost 6 upgrade)`
+2. `7d05d09` — `fix(ghost): upgrade to ghost:6-alpine for Node.js Oct 2026 security fixes`
+3. `92bcf25` — `docs: reflect Ghost 6 and document image refresh + major upgrade steps`
+4. `fb288a5` — `docs: add decision 002 (upgrade to Ghost 6)`
+5. `4c3c9d8` — `docs: add learning 004 (EOL major tags stop receiving runtime patches)`
 
 (Plus this session summary.)
 
