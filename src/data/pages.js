@@ -15,8 +15,8 @@ export const pages = [
     file: 'index.ejs',
     title: 'Paul Werner — Software Engineer',
     description:
-      'Paul Werner — software engineer based in Hamburg. Systems, craft, and quiet engineering.',
-    updated: '2026-08-30',
+      'Paul Werner — independent software engineer in Hamburg. Ten years designing and building the systems behind financial services, from payments to regulatory reporting.',
+    updated: '2026-11-21',
     priority: '1.0',
   },
   {
@@ -25,7 +25,7 @@ export const pages = [
     title: 'Imprint — Paul Werner',
     description: 'Imprint (Impressum) for paulwerner.net.',
     navLabel: 'Imprint',
-    updated: '2026-07-25',
+    updated: '2026-11-21',
     priority: '0.3',
   },
   {
@@ -34,7 +34,7 @@ export const pages = [
     title: 'Privacy Policy — Paul Werner',
     description: 'Privacy policy for paulwerner.net.',
     navLabel: 'Privacy',
-    updated: '2026-07-25',
+    updated: '2026-11-21',
     priority: '0.3',
   },
   {
@@ -43,7 +43,7 @@ export const pages = [
     title: 'Disclaimer — Paul Werner',
     description: 'Disclaimer for paulwerner.net.',
     navLabel: 'Disclaimer',
-    updated: '2026-07-25',
+    updated: '2026-11-21',
     priority: '0.3',
   },
   {
@@ -53,7 +53,7 @@ export const pages = [
     description:
       'Accessibility statement for paulwerner.net: WCAG 2.1 AA conformance, known limitations, and how to report a barrier.',
     navLabel: 'Accessibility',
-    updated: '2026-07-25',
+    updated: '2026-11-21',
     priority: '0.3',
   },
 ];
