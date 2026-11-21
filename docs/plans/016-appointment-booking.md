@@ -1,4 +1,4 @@
-# Session 013 — Self-Hosted Appointment Booking with Proton Calendar Sync
+# Session 016 — Self-Hosted Appointment Booking with Proton Calendar Sync
 
 ## Context
 
@@ -9,7 +9,7 @@ The landing page's only contact path is the `mailto:` CTA added in session 011. 
 - **Busy times out:** "Share calendar via link" — a secret read-only ICS URL (busy-only "Limited view"). Proton caches it; changes can lag minutes to a few hours.
 - **Bookings in:** Proton Mail **auto-adds emailed ICS invites** (`METHOD:REQUEST`) to Proton Calendar (default on), including updates and cancellations. Near real-time. (ICS-URL subscription the other way refreshes only every 8–16 h — unusable.)
 
-**Settled decisions (see decision record 002):**
+**Settled decisions (see decision record 004):**
 
 1. Email via **Proton SMTP submission** (`smtp.protonmail.ch:587`, SMTP token, sender `bookings@paulwerner.net`). `BOOKING_*` env vars kept **separate** from `GHOST_MAIL_*` (reserved for a future newsletter provider).
 2. **Instant confirmation**; small double-booking risk from busy-ICS lag accepted, mitigated by min-notice + polling + fresh re-fetch at booking time.
@@ -46,7 +46,7 @@ No published host ports (firewall allows only 22/80/443 — decision 001). Libra
 - `site/book/index.html` — booking page (follows the legal sub-page duplication recipe)
 - `site/book/manage/index.html` — cancel page (from confirmation-email link)
 - `docker-compose.dev.yml` — dev overlay: mailpit (`axllent/mailpit`, UI :8025), fixture ICS URL. Never deployed.
-- `docs/plans/013-appointment-booking.md`, `docs/decisions/002-self-hosted-booking-over-calendly.md`
+- `docs/plans/016-appointment-booking.md`, `docs/decisions/004-self-hosted-booking-over-calendly.md`
 - `docs/sessions/013-*.md` — only after acceptance
 
 **Modify:**
@@ -164,7 +164,7 @@ Owner's Proton address as ATTENDEE (organizer must be a different address) → P
 
 ## Commits (each independently committable)
 
-1. `docs: add plan 013 and decision record 002`
+1. `docs: add plan 016 and decision record 004`
 2. `feat(booking): scaffold Node service with config loading and health endpoint`
 3. `feat(infra): wire booking service into compose and Caddy`
 4. `feat(booking): slot computation engine with unit tests`

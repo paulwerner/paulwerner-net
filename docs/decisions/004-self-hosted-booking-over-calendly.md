@@ -1,4 +1,4 @@
-# Decision 002 — Self-Hosted Appointment Booking over Calendly / Cal.com
+# Decision 004 — Self-Hosted Appointment Booking over Calendly / Cal.com
 
 **Date:** 2026-07-02
 **Status:** Accepted

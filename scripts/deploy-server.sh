@@ -10,6 +10,8 @@ set -euo pipefail
 REPO_URL="https://github.com/paulwerner/paulwerner-net.git"
 APP_DIR="/opt/paulwerner-net"
 SWAPFILE="/swapfile"
+AUTO_REBOOT_CONF="/etc/apt/apt.conf.d/52unattended-upgrades-local"
+AUTO_REBOOT_TIME="04:00"
 
 log() { printf '\n=== %s ===\n' "$*"; }
 
@@ -31,6 +33,17 @@ step_unattended_upgrades() {
   log "Enabling unattended security upgrades"
   apt-get install -y unattended-upgrades
   dpkg-reconfigure -f noninteractive unattended-upgrades
+
+  # Kernel updates only take effect after a reboot. Without this, a patched
+  # kernel sits installed but not running until someone reboots by hand.
+  # Kept in a separate drop-in so the packaged 50unattended-upgrades stays
+  # untouched. The time is server-local (UTC on a default Hetzner image).
+  log "Enabling automatic reboot after updates that require one (${AUTO_REBOOT_TIME})"
+  cat > "$AUTO_REBOOT_CONF" <<EOF
+// Managed by scripts/deploy-server.sh — edits here are overwritten on re-run.
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "${AUTO_REBOOT_TIME}";
+EOF
 }
 
 step_harden_ssh() {

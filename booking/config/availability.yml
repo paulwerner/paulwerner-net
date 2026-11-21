@@ -13,7 +13,7 @@ buffer_before_minutes: 0
 buffer_after_minutes: 15
 
 # Earliest bookable slot, counted from "now". Also the safety margin against
-# the Proton busy-ICS propagation lag (see decision 002).
+# the Proton busy-ICS propagation lag (see decision 004).
 min_notice_hours: 24
 
 # Furthest bookable date, counted from "now".
