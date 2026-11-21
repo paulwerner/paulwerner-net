@@ -57,6 +57,7 @@ The PR stayed open for four months. A second review pass, run against a live loc
 - **Ghost wrote to browser storage.** With member source tracking on (the default), Ghost stores page history in `sessionStorage`. This is an Admin setting, now documented in `docs/deployment.md` as required to be off.
 - **Blog posts failed AA contrast.** Post bodies render on a light panel, where links, quotes and captions were at 2.4:1, and Ghost's callout, bookmark and button cards were unreadable or below 4.5:1. Fixed in `theme.css`; theme 0.4.2. axe-core now reports 0 violations on all five site pages and on the blog index, tag page, 404 page and two posts (one with every common card type), at desktop and mobile widths.
 - **Caddy imprint render verified.** The address placeholders render correctly through the real Caddy `templates` directive.
+- **Dates and description.** The privacy policy and accessibility statement carry 2026-11-21, the date they go live. The statement's assessment date moved to 21 November 2026 after its full method was re-run that day: axe-core and Lighthouse on all five pages (accessibility 100), a keyboard-only pass over every focusable element, heading and landmark checks, the contrast gate, and reduced-motion emulation. The home page's meta description was rewritten to describe the actual work.
 - **Build dependencies patched** (`npm audit fix`, two high-severity advisories, build-time only); the generated `site/` is unchanged.
 
-Still open from the list above: the MLBF contact details, CSP/security headers, and the `.gitignore` entries. The accessibility statement's assessment date (25 July 2026) was left as written.
+Still open from the list above: the MLBF contact details, CSP/security headers, and the `.gitignore` entries.
