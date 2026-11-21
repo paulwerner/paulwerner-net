@@ -80,6 +80,19 @@ curl -I https://blog.paulwerner.net
 5. On the server: `cd /opt/paulwerner-net && git pull` — Caddy serves `site/` from the bind mount, no restart needed.
 6. **Settings → Navigation** → ensure a `Home` entry points to `https://paulwerner.net/` so blog visitors can return to the main site.
 
+### 5. Privacy-relevant Ghost settings
+
+The privacy policy at `/privacy/` describes the blog as setting no cookies, storing nothing in the browser and sending nothing to third parties. The theme enforces part of that (`{{ghost_head exclude="search,portal,comment_counts"}}` keeps Ghost's jsDelivr-hosted scripts off the page). The rest depends on settings stored in Ghost's database, which the repo cannot set. In Ghost Admin → Settings, check after first-run setup and after major upgrades:
+
+| Setting (internal key) | Required value | Why |
+|---|---|---|
+| Analytics → Member sources (`members_track_sources`) | Off | When on, Ghost loads `member-attribution.min.js`, which writes the visitor's page history to `sessionStorage` (`ghost-history`) on every page |
+| Analytics → Web analytics (`web_analytics`) | Off | Sends page-view data to an analytics backend when one is configured |
+| Membership → Access (`members_signup_access`) | Nobody, unless a newsletter is launched | No sign-up UI exists in the theme; the privacy policy has to be extended before one is added |
+| Growth → Network / social web (`social_web`) | Off, unless deliberately used | Publishes posts through Ghost's hosted ActivityPub service, a third party |
+
+To check the result from a browser: open a blog post, then DevTools → Network (no request should leave `blog.paulwerner.net`) and Application → Storage (cookies, local storage and session storage all empty).
+
 ## Update workflow
 
 The standard loop: edit locally → commit → push → `git pull` on the server. The only file that lives exclusively on the server is `.env`.
@@ -97,7 +110,7 @@ What to do after `git pull`, depending on what changed:
 | `site/` only (landing or legal pages) | Nothing — Caddy serves from the bind mount |
 | `src/` (page source, styles, tokens) | Run `npm run build` **locally** and commit the regenerated `site/` alongside the source; the server never builds |
 | `Caddyfile` | `docker compose restart caddy` |
-| `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme) |
+| `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme). If files under `ghost-theme/assets/` changed, the commit also bumps `version` in `ghost-theme/package.json`; without that, browsers keep the cached CSS |
 | `docker-compose.yml` or `.env` | `docker compose up -d` |
 | Nothing — upstream security release (e.g. Node.js, MySQL, Caddy) | `docker compose pull && docker compose up -d` (`up -d` alone keeps the cached image for an unchanged tag) |
 

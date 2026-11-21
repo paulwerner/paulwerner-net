@@ -46,3 +46,17 @@ Review pass on the PR added: meta description corrected to Hamburg (`fix(site)`)
 ## Deploy notes
 
 Nothing changes on the server. Locally, any `src/` change requires `npm run build` and committing the regenerated `site/` in the same change. The theme went 0.1.4 → 0.4.1 this session — re-activate it in Admin after deploying so the `?v=` asset hash changes (learning 002).
+
+## Amendments before merge (2026-11-21)
+
+The PR stayed open for four months. A second review pass, run against a live local stack (Caddy, Ghost 6.78, MySQL), changed the following. Statements above that conflict with this section are superseded by it.
+
+- **Renumbered.** `main` had taken the numbers this session used, so the records became plan and session 015, decision 003 and learning 005. `main` was merged in (Ghost 6, automatic reboots).
+- **Server spec reverted to CAX11 (ARM64).** The "CX23 correction" above was wrong: the server runs on a CAX11, confirmed by the owner. README, the deployment doc and the provisioning script say CAX11 again.
+- **The blog still made third-party requests.** `{{ghost_head}}` injected Ghost's portal and search scripts from `cdn.jsdelivr.net` on every blog page. The source-level check could not see this, and the original session had no Docker daemon to render a page. The theme now excludes them.
+- **Ghost wrote to browser storage.** With member source tracking on (the default), Ghost stores page history in `sessionStorage`. This is an Admin setting, now documented in `docs/deployment.md` as required to be off.
+- **Blog posts failed AA contrast.** Post bodies render on a light panel, where links, quotes and captions were at 2.4:1, and Ghost's callout, bookmark and button cards were unreadable or below 4.5:1. Fixed in `theme.css`; theme 0.4.2. axe-core now reports 0 violations on all five site pages and on the blog index, tag page, 404 page and two posts (one with every common card type), at desktop and mobile widths.
+- **Caddy imprint render verified.** The address placeholders render correctly through the real Caddy `templates` directive.
+- **Build dependencies patched** (`npm audit fix`, two high-severity advisories, build-time only); the generated `site/` is unchanged.
+
+Still open from the list above: the MLBF contact details, CSP/security headers, and the `.gitignore` entries. The accessibility statement's assessment date (25 July 2026) was left as written.
