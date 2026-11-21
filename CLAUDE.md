@@ -38,7 +38,7 @@ All services run on a single VPS via Docker Compose on a shared bridge network. 
 
 ## Hosting
 
-Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the full decision (plan specs, cost, alternatives considered, firewall and backup strategy).
+Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the hosting decision (cost, alternatives considered, firewall and backup strategy). That record names the CX23 plan; the server was provisioned as a CAX11 instead, so container images must be available for `linux/arm64`. Server details live in [docs/deployment.md](docs/deployment.md).
 
 ## Domain Mapping
 
