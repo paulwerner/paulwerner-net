@@ -1,0 +1,127 @@
+  <main id="main" class="max-w-[720px] mx-auto px-6 pt-12 pb-12 flex-1 w-full">
+    <a href="/book/" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+      <span>&larr; Booking page</span>
+    </a>
+
+    <h1 class="font-typewriter text-[28px] tracking-[2px] uppercase mt-10">Your Appointment</h1>
+    <span class="block w-10 h-0.5 bg-accent mt-2" aria-hidden="true"></span>
+
+    <p id="loading" class="mt-6 font-serif text-[17px] leading-[1.8] text-muted">Loading&hellip;</p>
+
+    <div id="details" class="hidden mt-10 bg-card-bg border border-border rounded-md p-7">
+      <p class="font-typewriter text-[13px] tracking-[1px] uppercase text-muted"><span id="meeting-title"></span></p>
+      <p class="mt-3 font-serif text-[19px]" id="when"></p>
+      <p class="mt-1 font-typewriter text-[12px] tracking-[0.5px] text-muted" id="when-detail"></p>
+      <p id="status-line" class="hidden mt-4 font-serif text-[16px] text-gold"></p>
+
+      <div id="cancel-block" class="mt-7">
+        <button id="cancel-btn" type="button"
+                class="inline-block font-typewriter text-[14px] uppercase tracking-[2px] border border-muted text-muted rounded-md px-8 py-3 transition-colors duration-300 hover:border-accent hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+          Cancel appointment
+        </button>
+        <div id="confirm-block" class="hidden">
+          <p id="confirm-question" class="font-serif text-[16px]" tabindex="-1">Cancel this appointment for good?</p>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button id="confirm-btn" type="button"
+                    class="inline-block font-typewriter text-[14px] uppercase tracking-[2px] bg-accent text-bg rounded-md px-6 py-3 transition-colors duration-300 hover:bg-gold disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+              Yes, cancel it
+            </button>
+            <button id="keep-btn" type="button"
+                    class="inline-block font-typewriter text-[14px] uppercase tracking-[2px] border border-muted text-muted rounded-md px-6 py-3 transition-colors duration-300 hover:border-accent hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+              Keep it
+            </button>
+          </div>
+        </div>
+      </div>
+      <p id="action-error" class="hidden mt-4 font-serif text-[15px] text-gold" role="alert"></p>
+    </div>
+
+    <div id="cancelled" class="hidden mt-10 bg-card-bg border border-accent rounded-md p-7" tabindex="-1">
+      <h2 class="font-typewriter text-[18px] tracking-[1.5px] uppercase text-gold">Cancelled</h2>
+      <p class="mt-4 font-serif text-[17px] leading-[1.8]">Your appointment is cancelled. A confirmation email is on its way.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">Changed your mind? <a href="/book/" class="text-link hover:text-hover underline underline-offset-2">Pick a new time</a>.</p>
+    </div>
+
+    <div id="notfound" class="hidden mt-10">
+      <p class="font-serif text-[17px] leading-[1.8]">This link is not valid, or the appointment no longer exists.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">Please use the link from your confirmation email, or <a href="/book/" class="text-link hover:text-hover underline underline-offset-2">book a new appointment</a>.</p>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const API = '/api/book';
+      const $ = (id) => document.getElementById(id);
+      const params = new URLSearchParams(window.location.search);
+      const uid = params.get('uid');
+      const token = params.get('token');
+
+      const fullFmt = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      function showNotFound() {
+        $('loading').classList.add('hidden');
+        $('details').classList.add('hidden');
+        $('notfound').classList.remove('hidden');
+      }
+
+      async function load() {
+        if (!uid || !token) return showNotFound();
+        let res;
+        try {
+          res = await fetch(`${API}/bookings/${encodeURIComponent(uid)}?token=${encodeURIComponent(token)}`);
+        } catch (_) {
+          return showNotFound();
+        }
+        if (!res.ok) return showNotFound();
+        const booking = await res.json();
+        $('loading').classList.add('hidden');
+        $('meeting-title').textContent = booking.meetingTitle;
+        $('when').textContent = fullFmt.format(new Date(booking.start));
+        $('when-detail').textContent = `${Intl.DateTimeFormat().resolvedOptions().timeZone} · booked for ${booking.name}`;
+        if (booking.status === 'cancelled') {
+          $('status-line').textContent = 'This appointment has been cancelled.';
+          $('status-line').classList.remove('hidden');
+          $('cancel-block').classList.add('hidden');
+        }
+        $('details').classList.remove('hidden');
+      }
+
+      $('cancel-btn').addEventListener('click', () => {
+        $('cancel-btn').classList.add('hidden');
+        $('confirm-block').classList.remove('hidden');
+        // The clicked button just disappeared; move focus to the question.
+        $('confirm-question').focus();
+      });
+
+      $('keep-btn').addEventListener('click', () => {
+        $('confirm-block').classList.add('hidden');
+        $('cancel-btn').classList.remove('hidden');
+        $('cancel-btn').focus();
+      });
+
+      $('confirm-btn').addEventListener('click', async () => {
+        const btn = $('confirm-btn');
+        btn.disabled = true;
+        btn.textContent = 'Cancelling…';
+        try {
+          const res = await fetch(`${API}/bookings/${encodeURIComponent(uid)}/cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          $('details').classList.add('hidden');
+          $('cancelled').classList.remove('hidden');
+          $('cancelled').focus();
+        } catch (_) {
+          btn.disabled = false;
+          btn.textContent = 'Yes, cancel it';
+          const err = $('action-error');
+          err.textContent = 'Cancelling failed. Please try again, or write to contact@paulwerner.net.';
+          err.classList.remove('hidden');
+        }
+      });
+
+      load();
+    })();
+  </script>

@@ -1,0 +1,270 @@
+  <main id="main" class="max-w-[720px] mx-auto px-6 pt-12 pb-12 flex-1 w-full">
+<%- include('../partials/legal-header.ejs', { heading: 'Book an Appointment' }) %>
+
+    <p id="intro" class="mt-6 font-serif text-[17px] leading-[1.8] text-muted">Loading available times&hellip;</p>
+
+    <%# Announced by screen readers; holds errors that must outlive the form. %>
+    <p id="status" class="hidden mt-6 font-serif text-[16px] leading-[1.8] text-gold" role="status" aria-live="polite"></p>
+
+    <div id="picker" class="hidden">
+      <p class="mt-1 font-typewriter text-[13px] tracking-[1px] text-muted">Times shown in your timezone (<span id="visitor-tz"></span>).</p>
+
+      <h2 id="day-heading" class="font-typewriter text-[16px] tracking-[1.5px] uppercase mt-10">Pick a day</h2>
+      <div id="day-strip" class="flex gap-2 mt-4 overflow-x-auto p-1 pb-3" role="group" aria-labelledby="day-heading"></div>
+
+      <h2 id="slot-heading" class="font-typewriter text-[16px] tracking-[1.5px] uppercase mt-8">Pick a time</h2>
+      <div id="slot-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-4" role="group" aria-labelledby="slot-heading"></div>
+
+      <form id="form" class="hidden mt-10 bg-card-bg border border-border rounded-md p-7">
+        <p class="font-serif text-[17px]">
+          <span class="text-muted">Selected:</span>
+          <span id="selected-label" class="text-gold"></span>
+        </p>
+        <p id="selected-owner-tz" class="mt-1 font-typewriter text-[12px] tracking-[0.5px] text-muted"></p>
+
+        <div class="mt-6">
+          <label for="name" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">Name</label>
+          <input id="name" name="name" type="text" required maxlength="100" autocomplete="name"
+                 class="mt-2 w-full bg-inset-bg border border-muted rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent">
+        </div>
+        <div class="mt-5">
+          <label for="email" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">Email</label>
+          <input id="email" name="email" type="email" required maxlength="254" autocomplete="email"
+                 class="mt-2 w-full bg-inset-bg border border-muted rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent">
+        </div>
+        <div class="mt-5">
+          <label for="note" class="block font-typewriter text-[13px] tracking-[1px] uppercase text-muted">What would you like to talk about? <span class="normal-case">(optional)</span></label>
+          <textarea id="note" name="note" rows="3" maxlength="500"
+                    class="mt-2 w-full bg-inset-bg border border-muted rounded-md px-4 py-3 font-serif text-[16px] text-text focus:outline focus:outline-2 focus:outline-accent focus:border-accent"></textarea>
+        </div>
+        <%# Honeypot: hidden from people and assistive technology; bots fill it. %>
+        <div class="absolute -left-[9999px] top-auto" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p id="form-error" class="hidden mt-5 font-serif text-[15px] text-gold" role="alert"></p>
+
+        <p class="mt-6 font-serif text-[14px] leading-[1.7] text-muted">Your details are used only to arrange this appointment and are deleted afterwards. See the <a href="/privacy/" class="text-link hover:text-hover underline underline-offset-2">privacy policy</a>.</p>
+
+        <button id="submit" type="submit"
+                class="mt-6 inline-block font-typewriter text-[14px] uppercase tracking-[2px] bg-accent text-bg rounded-md px-8 py-3 transition-colors duration-300 hover:bg-gold disabled:opacity-50 disabled:hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+          Confirm booking
+        </button>
+      </form>
+    </div>
+
+    <div id="success" class="hidden mt-10 bg-card-bg border border-accent rounded-md p-7" tabindex="-1">
+      <h2 class="font-typewriter text-[18px] tracking-[1.5px] uppercase text-gold">Booked</h2>
+      <p class="mt-4 font-serif text-[17px] leading-[1.8]">Your appointment is confirmed for <span id="success-time" class="text-gold"></span>.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">A confirmation email with a calendar invite and a cancellation link is on its way to you.</p>
+    </div>
+
+    <div id="unavailable" class="hidden mt-10">
+      <p class="font-serif text-[17px] leading-[1.8]">Booking is temporarily unavailable.</p>
+      <p class="mt-2 font-serif text-[16px] leading-[1.8] text-muted">Please try again in a little while, or write to <a href="mailto:contact@paulwerner.net" class="text-link hover:text-hover underline underline-offset-2">contact@paulwerner.net</a>.</p>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const API = '/api/book';
+      const $ = (id) => document.getElementById(id);
+
+      const visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      // en-CA formats as YYYY-MM-DD — a stable, sortable grouping key.
+      const dayKeyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: visitorTz, year: 'numeric', month: '2-digit', day: '2-digit' });
+      const dayLabelFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+      const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
+      const fullFmt = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      let meta = null;
+      let ownerFmt = null;
+      let byDay = new Map(); // 'YYYY-MM-DD' -> [Date]
+      let selectedDayKey = null;
+      let selectedSlot = null; // Date
+
+      const FOCUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ';
+
+      function groupSlots(slots) {
+        byDay = new Map();
+        for (const iso of slots) {
+          const date = new Date(iso);
+          const key = dayKeyFmt.format(date);
+          if (!byDay.has(key)) byDay.set(key, []);
+          byDay.get(key).push(date);
+        }
+      }
+
+      // Plain toggle buttons: reachable with Tab, state exposed via aria-pressed.
+      function toggleButton({ label, pressed, className, onClick }) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = className;
+        btn.setAttribute('aria-pressed', String(pressed));
+        btn.textContent = label;
+        btn.addEventListener('click', onClick);
+        return btn;
+      }
+
+      function renderDays(focusKey) {
+        const strip = $('day-strip');
+        strip.replaceChildren();
+        for (const [key, slots] of byDay) {
+          const selected = key === selectedDayKey;
+          const btn = toggleButton({
+            label: `${dayLabelFmt.format(slots[0])} (${slots.length})`,
+            pressed: selected,
+            className: 'shrink-0 font-typewriter text-[12px] tracking-[1px] border rounded-[3px] px-3 py-2 transition-colors duration-300 ' + FOCUS +
+              (selected ? 'border-accent text-accent bg-inset-bg' : 'border-muted text-muted hover:text-link hover:border-accent'),
+            onClick: () => {
+              selectedDayKey = key;
+              selectedSlot = null;
+              $('form').classList.add('hidden');
+              renderDays(key);
+              renderSlots();
+            },
+          });
+          strip.appendChild(btn);
+          // Re-rendering drops focus; hand it back to the day just chosen.
+          if (key === focusKey) btn.focus();
+        }
+      }
+
+      function renderSlots(focusTime) {
+        const grid = $('slot-grid');
+        grid.replaceChildren();
+        for (const date of byDay.get(selectedDayKey) ?? []) {
+          const selected = !!selectedSlot && date.getTime() === selectedSlot.getTime();
+          const btn = toggleButton({
+            label: timeFmt.format(date),
+            pressed: selected,
+            className: 'font-typewriter text-[13px] tracking-[1px] border rounded-[3px] px-3 py-3 transition-colors duration-300 ' + FOCUS +
+              (selected ? 'bg-accent text-bg border-accent' : 'border-muted text-text hover:border-accent hover:text-link'),
+            onClick: () => selectSlot(date),
+          });
+          grid.appendChild(btn);
+          if (date.getTime() === focusTime) btn.focus();
+        }
+      }
+
+      function selectSlot(date) {
+        selectedSlot = date;
+        renderSlots(date.getTime());
+        $('selected-label').textContent = fullFmt.format(date);
+        $('selected-owner-tz').textContent = `${ownerFmt.format(date)} in ${meta.ownerTimezone} · ${meta.slotDurationMinutes} minutes`;
+        $('form-error').classList.add('hidden');
+        setStatus('');
+        $('form').classList.remove('hidden');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        $('form').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+      }
+
+      function showError(message) {
+        const el = $('form-error');
+        el.textContent = message;
+        el.classList.remove('hidden');
+      }
+
+      function setStatus(message) {
+        const el = $('status');
+        el.textContent = message;
+        el.classList.toggle('hidden', !message);
+      }
+
+      async function load() {
+        let res;
+        try {
+          res = await fetch(`${API}/slots`);
+        } catch (_) {
+          res = null;
+        }
+        if (!res || !res.ok) {
+          $('intro').classList.add('hidden');
+          $('picker').classList.add('hidden');
+          $('unavailable').classList.remove('hidden');
+          return;
+        }
+        meta = await res.json();
+        ownerFmt = new Intl.DateTimeFormat('en-GB', { timeZone: meta.ownerTimezone, hour: '2-digit', minute: '2-digit' });
+        groupSlots(meta.slots);
+        if (byDay.size === 0) {
+          // Also reached via reload after a taken slot — clear any stale picker.
+          $('picker').classList.add('hidden');
+          $('intro').textContent = 'No free times right now. Please check back soon, or write to contact@paulwerner.net.';
+          return;
+        }
+        if (!byDay.has(selectedDayKey)) selectedDayKey = byDay.keys().next().value;
+        $('intro').textContent = `${meta.meetingTitle} · ${meta.slotDurationMinutes} minutes. ${meta.locationNote || ''}`.trim();
+        $('visitor-tz').textContent = visitorTz;
+        renderDays();
+        renderSlots();
+        $('picker').classList.remove('hidden');
+      }
+
+      $('form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!selectedSlot) return;
+        const submit = $('submit');
+        submit.disabled = true;
+        submit.textContent = 'Booking…';
+        try {
+          const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              start: selectedSlot.toISOString().replace('.000Z', 'Z'),
+              name: $('name').value,
+              email: $('email').value,
+              note: $('note').value || undefined,
+              timezone: visitorTz,
+              website: $('website').value,
+            }),
+          });
+          if (res.status === 201) {
+            $('picker').classList.add('hidden');
+            $('intro').classList.add('hidden');
+            setStatus('');
+            $('success-time').textContent = fullFmt.format(selectedSlot);
+            $('success').classList.remove('hidden');
+            $('success').focus();
+            return;
+          }
+          if (res.status === 409) {
+            // The form is hidden with the stale slot, so the message goes
+            // into the status line above the picker.
+            selectedSlot = null;
+            $('form').classList.add('hidden');
+            await load();
+            setStatus('That time was just taken. Please pick another one.');
+            return;
+          }
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 422) {
+            showError(`Please check the ${body.field ?? 'form'} field.`);
+            return;
+          }
+          if (res.status === 429 && body.scope === 'email') {
+            showError('This email address already has upcoming appointments. Please cancel one first, using the link in its confirmation email.');
+            return;
+          }
+          if (res.status === 429 && body.scope === 'day') {
+            showError('No more bookings can be accepted today. Please try again tomorrow, or write to contact@paulwerner.net.');
+            return;
+          }
+          if (res.status === 429) {
+            showError('Too many attempts from your network. Please try again later.');
+            return;
+          }
+          showError('Something went wrong. Please try again, or write to contact@paulwerner.net.');
+        } catch (_) {
+          showError('Network error. Please try again.');
+        } finally {
+          submit.disabled = false;
+          submit.textContent = 'Confirm booking';
+        }
+      });
+
+      load();
+    })();
+  </script>
