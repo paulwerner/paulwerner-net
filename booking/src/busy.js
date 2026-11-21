@@ -53,7 +53,7 @@ function expandEvent(event, windowStart, windowEnd, zone) {
   for (const occurrence of event.rrule.between(queryStart, windowEnd, true)) {
     const t = occurrence.getTime();
     if (exdates.has(t) || overridden.has(t)) continue;
-    intervals.push({ start: new Date(t), end: new Date(t + durationMs) });
+    intervals.push(eventBounds({ datetype: event.datetype, start: new Date(t), end: new Date(t + durationMs) }, zone));
   }
   for (const override of Object.values(event.recurrences ?? {})) {
     if (override.end > windowStart && override.start < windowEnd) {

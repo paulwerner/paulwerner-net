@@ -106,3 +106,22 @@ test('concurrent callers share a single in-flight refresh', async () => {
   await Promise.all([source.getBusyIntervals(), source.getBusyIntervals(), source.getBusyIntervals()]);
   assert.equal(calls, 1);
 });
+
+test('recurring all-day events are anchored to the owner timezone too', async () => {
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//test//EN',
+    'BEGIN:VEVENT', 'UID:allday-weekly@test', 'DTSTAMP:20260101T000000Z',
+    'DTSTART;VALUE=DATE:20260708', 'DTEND;VALUE=DATE:20260709', 'RRULE:FREQ=WEEKLY;BYDAY=WE',
+    'END:VEVENT', 'END:VCALENDAR', '',
+  ].join('\r\n');
+  const source = createBusySource({
+    url: 'memory', ttlSeconds: 300, horizonDays: 10, timezone: 'Europe/Berlin',
+    loader: async () => ics, now: () => new Date('2026-07-10T00:00:00Z'),
+  });
+  const intervals = await source.getBusyIntervals();
+  // Wednesday 15 July, midnight to midnight in Berlin (UTC+2).
+  assert.deepEqual(
+    intervals.map((iv) => [iv.start.toISOString(), iv.end.toISOString()]),
+    [['2026-07-14T22:00:00.000Z', '2026-07-15T22:00:00.000Z']],
+  );
+});

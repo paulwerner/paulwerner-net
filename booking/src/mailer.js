@@ -17,10 +17,16 @@ export function createMailer({ config, transport }) {
       // Dev SMTP sinks (mailpit) advertise no AUTH; only authenticate when
       // credentials are actually configured.
       auth: config.smtp.user ? { user: config.smtp.user, pass: config.smtp.password } : undefined,
+      // The booking request waits for both emails; nodemailer's defaults
+      // (two minutes to connect, ten for the socket) would hang the visitor.
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
     });
 
   const zone = config.availability.timezone;
-  const { title, locationNote } = config.availability.meeting;
+  const { title, locationNote, hostName } = config.availability.meeting;
+  const senderName = `${new URL(config.publicUrl).hostname} bookings`;
 
   function icsFor(booking, method) {
     return buildIcs({
@@ -30,16 +36,18 @@ export function createMailer({ config, transport }) {
       start: booking.slot_start,
       end: booking.slot_end,
       summary: `${title} — ${booking.name}`,
-      description: [`Booked via ${config.publicUrl}/book/`, booking.note ? `Note: ${booking.note}` : '']
-        .filter(Boolean)
-        .join('\n'),
+      // The visitor's note stays out of the invite: the same file goes to
+      // the address they typed, which nobody has verified, and free text
+      // there would let the form send arbitrary content to third parties.
+      // The owner gets the note in the notification email body.
+      description: `Booked via ${config.publicUrl}/book/`,
       location: locationNote,
       // The From address organizes; the owner's Proton address must be an
       // ATTENDEE (not the organizer) or Proton treats the invite as
       // self-organized and skips auto-add.
-      organizer: { name: 'paulwerner.net bookings', email: config.fromAddress },
+      organizer: { name: senderName, email: config.fromAddress },
       attendees: [
-        { name: 'Paul Werner', email: config.ownerEmail, partstat: 'NEEDS-ACTION', rsvp: true },
+        { name: hostName, email: config.ownerEmail, partstat: 'NEEDS-ACTION', rsvp: true },
         { name: booking.name, email: booking.email, partstat: 'ACCEPTED' },
       ],
     });
@@ -47,7 +55,7 @@ export function createMailer({ config, transport }) {
 
   async function send({ to, subject, text, ics, method }) {
     return mail.sendMail({
-      from: { name: 'paulwerner.net bookings', address: config.fromAddress },
+      from: { name: senderName, address: config.fromAddress },
       to,
       subject,
       text,

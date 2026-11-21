@@ -68,7 +68,7 @@ test('mailer sends owner invite and prospect confirmation with ICS parts', async
     ownerEmail: 'owner@proton.me',
     fromAddress: 'bookings@paulwerner.net',
     smtp: { host: 'unused', port: 587, user: '', password: '' },
-    availability: { timezone: 'Europe/Berlin', meeting: { title: 'Intro call', locationNote: 'Video call' } },
+    availability: { timezone: 'Europe/Berlin', meeting: { title: 'Intro call', locationNote: 'Video call', hostName: 'Test Host' } },
   };
   const mailer = createMailer({ config, transport });
   const origSend = transport.sendMail.bind(transport);
@@ -108,6 +108,12 @@ test('mailer sends owner invite and prospect confirmation with ICS parts', async
   const decoded = prospectMail.raw.replace(/=\r\n/g, '').replace(/=3D/g, '=');
   assert.match(decoded, /token=t0k3n/);
   assert.match(prospectMail.raw, /method=REQUEST/);
+  // The note is free text from an unverified sender: the owner reads it in
+  // the notification body, and it never travels to the address they typed.
+  assert.match(ownerMail.raw, /About the Ghost theme/);
+  assert.doesNotMatch(prospectMail.raw, /Ghost theme/);
+  assert.match(ownerMail.raw, /Test Host/);
+  assert.match(ownerMail.raw, /paulwerner\.net bookings/);
 });
 
 test('cancellation emails carry METHOD:CANCEL with bumped sequence', async () => {
@@ -125,7 +131,7 @@ test('cancellation emails carry METHOD:CANCEL with bumped sequence', async () =>
       ownerEmail: 'owner@proton.me',
       fromAddress: 'bookings@paulwerner.net',
       smtp: { host: 'unused', port: 587, user: '', password: '' },
-      availability: { timezone: 'Europe/Berlin', meeting: { title: 'Intro call', locationNote: '' } },
+      availability: { timezone: 'Europe/Berlin', meeting: { title: 'Intro call', locationNote: '', hostName: 'Test Host' } },
     },
     transport,
   });
