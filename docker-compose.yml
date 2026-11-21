@@ -21,7 +21,7 @@ services:
       - web
 
   ghost:
-    image: ghost:5-alpine
+    image: ghost:6-alpine
     restart: unless-stopped
     environment:
       url: ${GHOST_URL}

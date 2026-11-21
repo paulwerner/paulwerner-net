@@ -7,7 +7,7 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 ## Tech Stack
 
 - **Landing page**: Semantic HTML templated with EJS, styled with Tailwind CSS v4 compiled by the Tailwind CLI. Hand-written source lives in `src/`; `build.mjs` generates `site/`, which is committed and served
-- **Blog engine**: Ghost 5 (official `ghost:5-alpine` image)
+- **Blog engine**: Ghost 6 (official `ghost:6-alpine` image, Node.js 22)
 - **Database**: MySQL 8 (Ghost's recommended database)
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
 - **Container orchestration**: Docker Compose
@@ -38,7 +38,7 @@ All services run on a single VPS via Docker Compose on a shared bridge network. 
 
 ## Hosting
 
-Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the full decision (plan specs, cost, alternatives considered, firewall and backup strategy).
+Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the hosting decision (cost, alternatives considered, firewall and backup strategy). That record names the CX23 plan; the server was provisioned as a CAX11 instead, so container images must be available for `linux/arm64`. Server details live in [docs/deployment.md](docs/deployment.md).
 
 ## Domain Mapping
 
@@ -88,6 +88,9 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 │   ├── tag.hbs
 │   ├── error-404.hbs
 │   └── package.json
+├── scripts/
+│   ├── contrast-report.mjs # WCAG contrast gate, run by the build
+│   └── deploy-server.sh    # idempotent VPS provisioning
 ├── src/                    # hand-written source for the static site
 │   ├── assets/             # images + TravelingTypewriter.otf (font source)
 │   ├── data/pages.js       # page registry: footer nav, sitemap, titles
@@ -117,9 +120,11 @@ npm run contrast     # WCAG ratios for every brand token pair
 npm run verify:no-third-party
 ```
 
-The build renders each page in `src/data/pages.js`, compiles `src/styles/main.css`, copies assets and self-hosted fonts, writes `robots.txt` and `sitemap.xml`, and asserts that the Caddy `{{env ...}}` placeholders in the imprint survived templating. Brand tokens are defined once, in `src/styles/tokens.css`. See [docs/decisions/002-static-build-tailwind-v4-and-ejs.md](docs/decisions/002-static-build-tailwind-v4-and-ejs.md).
+The build renders each page in `src/data/pages.js`, compiles `src/styles/main.css`, copies assets and self-hosted fonts, writes `robots.txt` and `sitemap.xml`, and asserts that the Caddy `{{env ...}}` placeholders in the imprint survived templating. Brand tokens are defined once, in `src/styles/tokens.css`. See [docs/decisions/003-static-build-tailwind-v4-and-ejs.md](docs/decisions/003-static-build-tailwind-v4-and-ejs.md).
 
 `site/imprint/index.html` is post-processed by Caddy's `templates` directive at request time — the `{{env "IMPRINT_STREET"}}` / `{{env "IMPRINT_CITY"}}` placeholders must survive any change to the build.
+
+`scripts/deploy-server.sh` is the idempotent provisioning script for the VPS (package updates, unattended upgrades with automatic reboots, SSH hardening, UFW, Docker, swap). It is the one place where host-level configuration lives. Backup helpers are not scaffolded yet.
 
 ## Environment Variables
 

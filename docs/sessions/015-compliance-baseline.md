@@ -1,6 +1,6 @@
-# 013 — Compliance baseline
+# 015 — Compliance baseline
 
-**Plan:** [docs/plans/013-compliance-baseline.md](../plans/013-compliance-baseline.md)
+**Plan:** [docs/plans/015-compliance-baseline.md](../plans/015-compliance-baseline.md)
 **Branch:** `claude/portfolio-compliance-baseline-xfrok4` → PR #2
 
 ## Why
@@ -17,8 +17,8 @@ The site is being repositioned as a portfolio selling DSGVO/BFSG compliance and 
 
 ## Key decisions
 
-- Tailwind v4 + EJS: [decision 002](../decisions/002-static-build-tailwind-v4-and-ejs.md).
-- Fonts audited by what the code renders, not by the request being replaced: [learning 004](../learnings/004-font-stacks-are-not-inventories.md).
+- Tailwind v4 + EJS: [decision 003](../decisions/003-static-build-tailwind-v4-and-ejs.md).
+- Fonts audited by what the code renders, not by the request being replaced: [learning 005](../learnings/005-font-stacks-are-not-inventories.md).
 - Token hexes stay duplicated between `src/styles/tokens.css` and the theme's `:root` — unifying would make part of the hand-written theme generated output.
 
 ## What verification caught

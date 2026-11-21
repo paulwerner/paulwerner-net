@@ -1,4 +1,4 @@
-# 013 — Compliance baseline: zero third-party requests, WCAG 2.1 AA, truthful privacy
+# 015 — Compliance baseline: zero third-party requests, WCAG 2.1 AA, truthful privacy
 
 ## Context
 
@@ -20,7 +20,7 @@ Outcome: the site becomes the proof of its own claim — zero external requests,
 
 ## Decisions
 
-Recorded in [decision 002](../decisions/002-static-build-tailwind-v4-and-ejs.md): Tailwind v4.3.3 with a CSS-first `@theme` (hand-written CSS needs the token values as custom properties) and EJS (`<% %>` delimiters leave Caddy's placeholders intact). Fonts ship strictly by what each artefact renders — the old Google request was wrong in both directions ([learning 004](../learnings/004-font-stacks-are-not-inventories.md)). The Ghost theme keeps its own `:root` token copy, deliberately.
+Recorded in [decision 003](../decisions/003-static-build-tailwind-v4-and-ejs.md): Tailwind v4.3.3 with a CSS-first `@theme` (hand-written CSS needs the token values as custom properties) and EJS (`<% %>` delimiters leave Caddy's placeholders intact). Fonts ship strictly by what each artefact renders — the old Google request was wrong in both directions ([learning 005](../learnings/005-font-stacks-are-not-inventories.md)). The Ghost theme keeps its own `:root` token copy, deliberately.
 
 ## Work items (one commit each)
 
@@ -30,7 +30,7 @@ Recorded in [decision 002](../decisions/002-static-build-tailwind-v4-and-ejs.md)
 - **A11y pass** — skip link on every page (site + theme), styled rather than hidden scrollbar, global `:focus-visible` outline, `figure`/`figcaption` for the hero quote, reduced-motion honoured in JS, theme heading order fixed (`h1` on the post index, cards `h2`). Contrast measured from the shipped tokens; `border` is decorative-only. New `/accessibility/` statement: voluntary conformance (BFSG micro-enterprise exemption, Sec. 2 no. 17 / Sec. 3 (3) BFSG), MLBF as market surveillance authority — cited by postal address, email and website; the phone number is omitted because sources disagree and `mlbf-barrierefrei.de` is unreachable through this environment's proxy (flagged for manual confirmation). Plus scope, self-assessment method and date, known limitations, feedback route.
 - **robots.txt + sitemap.xml** — sitemap generated from the page registry with hand-set `lastmod` so rebuilds are deterministic; robots.txt is per-host, future demo subdomains serve their own.
 - **Server docs** — CAX11/ARM → CX23/x86_64 in README, deployment doc, and the provisioning script's header comments only (the logic already derives the architecture at runtime). Plans/sessions keep their CAX11 references as historical records.
-- **Docs** — decision 002, learning 004 if implementation surprises, CLAUDE.md and README refresh; session summary only after acceptance.
+- **Docs** — decision 003, learning 005 if implementation surprises, CLAUDE.md and README refresh; session summary only after acceptance.
 
 ## Verification (results go in the PR)
 

@@ -1,7 +1,7 @@
-# 002 — Static build: Tailwind v4 (CSS-first) and EJS
+# 003 — Static build: Tailwind v4 (CSS-first) and EJS
 
 **Status:** Accepted — July 2026
-**Context:** Session 013 (compliance baseline)
+**Context:** Session 015 (compliance baseline)
 
 ## Problem
 

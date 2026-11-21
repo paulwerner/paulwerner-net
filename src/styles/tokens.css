@@ -2,7 +2,7 @@
  * for the landing and legal pages. Tailwind's @theme emits each entry as both
  * a utility class and a CSS custom property; scripts/contrast-report.mjs
  * parses this file directly. ghost-theme/assets/css/theme.css keeps its own
- * :root copy by design (docs/decisions/002). */
+ * :root copy by design (docs/decisions/003). */
 
 @theme {
   --color-bg: #0f0b07;

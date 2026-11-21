@@ -4,7 +4,7 @@ Content infrastructure for paulwerner.net — a static landing page at the root 
 
 ## Architecture
 
-A single VPS (Hetzner CX23 in Nuremberg, Ubuntu 24.04 on x86_64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 5** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
+A single VPS (Hetzner CAX11 in Nuremberg, Ubuntu 24.04 ARM64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 6** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
 
 ## Building the site
 
@@ -49,4 +49,4 @@ Server provisioning and the deploy/update workflow are documented in [docs/deplo
 - [CLAUDE.md](CLAUDE.md) — directory layout, session workflow, conventions
 - [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) — hosting plan, cost, backup strategy
 - [docs/brand/brand-guidelines.md](docs/brand/brand-guidelines.md) — colors, typography, components
-- [docs/decisions/002-static-build-tailwind-v4-and-ejs.md](docs/decisions/002-static-build-tailwind-v4-and-ejs.md) — why Tailwind v4 and EJS
+- [docs/decisions/003-static-build-tailwind-v4-and-ejs.md](docs/decisions/003-static-build-tailwind-v4-and-ejs.md) — why Tailwind v4 and EJS

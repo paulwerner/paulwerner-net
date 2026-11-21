@@ -1,4 +1,4 @@
-# 004 — A font stack is not an inventory of fonts that render
+# 005 — A font stack is not an inventory of fonts that render
 
 **Assumed:** when replacing Google Fonts with self-hosted files, the request being replaced is the source of truth — self-host exactly what was requested and the swap is faithful.
 
