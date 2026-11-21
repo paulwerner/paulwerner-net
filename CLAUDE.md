@@ -88,9 +88,6 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 │   ├── tag.hbs
 │   ├── error-404.hbs
 │   └── package.json
-├── scripts/
-│   ├── contrast-report.mjs # WCAG contrast gate, run by the build
-│   └── deploy-server.sh    # idempotent VPS provisioning
 ├── src/                    # hand-written source for the static site
 │   ├── assets/             # images + TravelingTypewriter.otf (font source)
 │   ├── data/pages.js       # page registry: footer nav, sitemap, titles
