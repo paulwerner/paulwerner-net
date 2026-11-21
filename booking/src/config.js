@@ -72,6 +72,13 @@ export function parseAvailability(yamlText) {
   };
 
   if (!raw.meeting?.title || typeof raw.meeting.title !== 'string') fail('meeting.title is required');
+  if (!raw.meeting.host_name || typeof raw.meeting.host_name !== 'string') fail('meeting.host_name is required');
+
+  const limit = (key, fallback) => {
+    const value = raw.limits?.[key] ?? fallback;
+    if (!Number.isInteger(value) || value <= 0) fail(`limits.${key} must be a positive integer`);
+    return value;
+  };
 
   const weekly = {};
   for (const [day, windows] of Object.entries(raw.weekly ?? {})) {
@@ -95,7 +102,12 @@ export function parseAvailability(yamlText) {
     maxHorizonDays: positiveInt('max_horizon_days'),
     meeting: {
       title: raw.meeting.title,
+      hostName: raw.meeting.host_name,
       locationNote: raw.meeting.location_note ?? '',
+    },
+    limits: {
+      maxActivePerEmail: limit('max_active_per_email', 2),
+      maxNewPerDay: limit('max_new_per_day', 10),
     },
     weekly,
     blockedDates,

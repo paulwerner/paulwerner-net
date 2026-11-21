@@ -82,13 +82,17 @@ function tokenMatches(row, token) {
   return stored.length === given.length && timingSafeEqual(given, stored);
 }
 
-// maxAgeSeconds shrinks the double-booking window at booking time by forcing
-// a fresher Proton fetch than the regular poll interval.
-async function availableSlots(maxAgeSeconds) {
-  const busyIntervals = await busy.getBusyIntervals({ maxAgeSeconds });
+// Synchronous on purpose: callers that go on to insert must not await between
+// this and the insert, or a concurrent request could book a neighbouring slot
+// that the buffers rule out (the unique index only covers identical starts).
+function slotsGiven(busyIntervals) {
   const bookedIntervals = db.confirmedIntervals(new Date().toISOString());
   return computeSlots({ availability: config.availability, busyIntervals, bookedIntervals });
 }
+
+// A visitor's name ends up in emails sent to an address nobody has verified.
+// Anything that reads as a link or an address is refused.
+const NAME_FORBIDDEN_RE = /[<>@\/\\]|:\/\/|www\./i;
 
 const app = express();
 // Caddy is the only client; trust its X-Forwarded-For so req.ip is the visitor.
@@ -113,7 +117,7 @@ app.get('/api/book/health', (req, res) => {
 
 app.get('/api/book/slots', createRateLimiter({ limit: 60, windowMs: 60_000 }), async (req, res, next) => {
   try {
-    const slots = await availableSlots();
+    const slots = slotsGiven(await busy.getBusyIntervals());
     res.json({
       slotDurationMinutes: config.availability.slotDurationMinutes,
       ownerTimezone: config.availability.timezone,
@@ -138,7 +142,7 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
     const start = normalizeStart(req.body?.start);
     const timezone = req.body?.timezone ? validTimezone(req.body.timezone) : null;
 
-    if (!name) return res.status(422).json({ error: 'validation', field: 'name' });
+    if (!name || NAME_FORBIDDEN_RE.test(name)) return res.status(422).json({ error: 'validation', field: 'name' });
     if (!email || !EMAIL_RE.test(email)) return res.status(422).json({ error: 'validation', field: 'email' });
     if (req.body?.note && note === null) return res.status(422).json({ error: 'validation', field: 'note' });
     if (!start) return res.status(422).json({ error: 'validation', field: 'start' });
@@ -154,14 +158,28 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
       return res.status(201).json({ uid, start, end, durationMinutes });
     }
 
-    let slots;
+    // maxAgeSeconds shrinks the double-booking window by forcing a fresher
+    // Proton fetch than the regular poll interval.
+    let busyIntervals;
     try {
-      slots = await availableSlots(60);
+      busyIntervals = await busy.getBusyIntervals({ maxAgeSeconds: 60 });
     } catch (err) {
       console.error('booking refused, busy calendar unavailable:', err.message);
       return res.status(503).json({ error: 'unavailable' });
     }
-    if (!slots.includes(start)) return res.status(409).json({ error: 'slot_taken' });
+
+    // No await from here to the insert: availability check, limits and insert
+    // run as one uninterrupted step in the single-threaded event loop.
+    const nowIso = new Date().toISOString();
+    if (!slotsGiven(busyIntervals).includes(start)) return res.status(409).json({ error: 'slot_taken' });
+    const { maxActivePerEmail, maxNewPerDay } = config.availability.limits;
+    if (db.countActiveByEmail(email, nowIso) >= maxActivePerEmail) {
+      return res.status(429).json({ error: 'limit', scope: 'email' });
+    }
+    if (db.countCreatedSince(new Date(Date.now() - DAY_MS).toISOString()) >= maxNewPerDay) {
+      console.error(`booking refused: daily limit of ${maxNewPerDay} new bookings reached`);
+      return res.status(429).json({ error: 'limit', scope: 'day' });
+    }
 
     const token = randomBytes(24).toString('base64url');
     let booking;
@@ -175,7 +193,7 @@ app.post('/api/book', createRateLimiter({ limit: 5, windowMs: 3600_000 }), async
         note,
         timezone,
         manageTokenHash: hashToken(token).toString('hex'),
-        createdAt: new Date().toISOString(),
+        createdAt: nowIso,
       });
     } catch (err) {
       if (err instanceof SlotTakenError) return res.status(409).json({ error: 'slot_taken' });

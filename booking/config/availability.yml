@@ -22,6 +22,8 @@ max_horizon_days: 30
 meeting:
   # ICS SUMMARY becomes "<title> — <prospect name>".
   title: "Intro call"
+  # Shown as the host in calendar invites.
+  host_name: "Paul Werner"
   location_note: "Video call — a meeting link follows by email before we talk."
 
 weekly:
@@ -34,6 +36,15 @@ weekly:
     - { start: "10:00", end: "17:00" }
   fri:
     - { start: "10:00", end: "13:00" }
+
+# Abuse limits. Nobody verifies the email address before a booking is
+# confirmed, so these cap how many slots (and confirmation emails) a single
+# address or a burst of requests can consume.
+limits:
+  # Upcoming bookings one email address may hold at the same time.
+  max_active_per_email: 2
+  # New bookings accepted per rolling 24 hours, across all visitors.
+  max_new_per_day: 10
 
 # Whole days blocked regardless of `weekly`, as YYYY-MM-DD in `timezone`.
 blocked_dates: []

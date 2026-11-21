@@ -62,6 +62,21 @@ test('confirmedIntervals excludes cancelled and past bookings', () => {
   assert.deepEqual(intervals, [{ start: '2026-07-02T12:00:00Z', end: '2026-07-02T12:30:00Z' }]);
 });
 
+test('counts upcoming bookings per address and bookings created since an instant', () => {
+  const db = openDb(':memory:');
+  db.createBooking(booking({ slotStart: '2026-07-02T12:00:00Z', slotEnd: '2026-07-02T12:30:00Z', createdAt: '2026-07-01T08:00:00Z' }));
+  db.createBooking(booking({ slotStart: '2026-07-03T12:00:00Z', slotEnd: '2026-07-03T12:30:00Z', email: 'Prospect@Example.com', createdAt: '2026-07-01T09:00:00Z' }));
+  const cancelled = db.createBooking(booking({ slotStart: '2026-07-04T12:00:00Z', slotEnd: '2026-07-04T12:30:00Z', createdAt: '2026-07-01T10:00:00Z' }));
+  db.cancelBooking(cancelled.uid, '2026-07-01T11:00:00Z');
+  db.createBooking(booking({ slotStart: '2026-07-05T12:00:00Z', slotEnd: '2026-07-05T12:30:00Z', email: 'other@example.com', createdAt: '2026-07-01T12:00:00Z' }));
+
+  // Case-insensitive, confirmed only, and only appointments still ahead.
+  assert.equal(db.countActiveByEmail('prospect@example.com', '2026-07-01T00:00:00.000Z'), 2);
+  assert.equal(db.countActiveByEmail('prospect@example.com', '2026-07-02T13:00:00.000Z'), 1);
+  // Cancelled bookings still count as created: cancelling must not refill the daily budget.
+  assert.equal(db.countCreatedSince('2026-07-01T08:30:00.000Z'), 3);
+});
+
 test('maintenance deletes expired rows and writes a backup copy', () => {
   const dir = mkdtempSync(join(tmpdir(), 'booking-db-'));
   const db = openDb(join(dir, 'bookings.db'));

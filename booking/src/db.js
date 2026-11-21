@@ -51,6 +51,10 @@ export function openDb(path) {
     "SELECT slot_start, slot_end FROM bookings WHERE status = 'confirmed' AND slot_end > ?",
   );
   const cleanupStmt = db.prepare('DELETE FROM bookings WHERE slot_end < ?');
+  const activeByEmailStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM bookings WHERE status = 'confirmed' AND slot_end > ? AND lower(email) = lower(?)",
+  );
+  const createdSinceStmt = db.prepare('SELECT COUNT(*) AS n FROM bookings WHERE created_at > ?');
 
   return {
     // The partial unique index uq_active_slot is the race arbiter: two
@@ -78,6 +82,16 @@ export function openDb(path) {
 
     confirmedIntervals(fromIso) {
       return confirmedStmt.all(secondPrecision(fromIso)).map((row) => ({ start: row.slot_start, end: row.slot_end }));
+    },
+
+    // Upcoming confirmed bookings held by one address.
+    countActiveByEmail(email, nowIso) {
+      return activeByEmailStmt.get(secondPrecision(nowIso), email).n;
+    },
+
+    // Bookings created after the given instant, cancelled ones included.
+    countCreatedSince(sinceIso) {
+      return createdSinceStmt.get(sinceIso).n;
     },
 
     ping() {

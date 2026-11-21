@@ -129,6 +129,7 @@ min_notice_hours: 24
 max_horizon_days: 30
 meeting:
   title: "Intro call"
+  host_name: "Host"
 weekly:
   thu: [{ start: "10:00", end: "12:00" }]
 blocked_dates: [2026-07-09]
@@ -137,6 +138,24 @@ blocked_dates: [2026-07-09]
   const slots = computeSlots({ availability: avail, now: NOW });
   assert.ok(slots.length > 0);
   assert.ok(slots.every((s) => !s.startsWith('2026-07-09T')));
+  // Limits fall back to their defaults when the file omits them.
+  assert.deepEqual(avail.limits, { maxActivePerEmail: 2, maxNewPerDay: 10 });
+  assert.equal(avail.meeting.hostName, 'Host');
+});
+
+test('parseAvailability requires a host name and positive limits', () => {
+  const base = `
+timezone: Europe/Berlin
+slot_duration_minutes: 30
+max_horizon_days: 30
+weekly:
+  mon: [{ start: "10:00", end: "12:00" }]
+`;
+  assert.throws(() => parseAvailability(`${base}meeting: { title: "Call" }\n`), /host_name/);
+  assert.throws(
+    () => parseAvailability(`${base}meeting: { title: "Call", host_name: "Host" }\nlimits: { max_new_per_day: 0 }\n`),
+    /max_new_per_day/,
+  );
 });
 
 test('parseAvailability rejects overlapping windows', () => {
@@ -144,7 +163,7 @@ test('parseAvailability rejects overlapping windows', () => {
 timezone: Europe/Berlin
 slot_duration_minutes: 30
 max_horizon_days: 30
-meeting: { title: "Call" }
+meeting: { title: "Call", host_name: "Host" }
 weekly:
   mon: [{ start: "10:00", end: "12:00" }, { start: "11:30", end: "14:00" }]
 `;
