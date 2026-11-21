@@ -93,6 +93,39 @@ The privacy policy at `/privacy/` describes the blog as setting no cookies, stor
 
 To check the result from a browser: open a blog post, then DevTools → Network (no request should leave `blog.paulwerner.net`) and Application → Storage (cookies, local storage and session storage all empty).
 
+### 6. Booking service
+
+The appointment scheduler at `/book/` is a small Node.js service built from `booking/` on the server. It needs a Proton account that offers SMTP submission (a paid plan) and a calendar shared by link.
+
+1. **Sender address.** In Proton, create the address bookings are sent from (for example `bookings@paulwerner.net`) and generate an SMTP token for it under Settings → IMAP/SMTP → SMTP tokens.
+2. **Busy calendar link.** In Proton Calendar, share the calendar that holds your appointments via link, with limited (busy-only) access, and copy the ICS URL. Treat it like a password.
+3. **`.env`.** Add the `BOOKING_*` keys from `.env.example`:
+
+   | Key | Value |
+   |-----|-------|
+   | `BOOKING_SMTP_HOST` / `BOOKING_SMTP_PORT` | `smtp.protonmail.ch` / `587` |
+   | `BOOKING_SMTP_USER` | the sender address |
+   | `BOOKING_SMTP_PASSWORD` | the SMTP token, never the account password |
+   | `BOOKING_FROM_ADDRESS` | the sender address |
+   | `BOOKING_OWNER_EMAIL` | the Proton address that should receive the invites; it must differ from the sender, or Proton does not add the invite to the calendar |
+   | `BOOKING_BUSY_ICS_URL` | the shared calendar's ICS URL |
+
+4. **Availability.** Edit `booking/config/availability.yml` (weekly hours, slot length, buffers, notice period, limits), commit and pull.
+5. **Start.**
+
+   ```bash
+   docker compose up -d --build booking
+   docker compose restart caddy            # picks up the /api/book route
+   docker compose ps booking               # "healthy" once the first calendar fetch succeeded
+   curl -s https://paulwerner.net/api/book/health
+   ```
+
+6. **Test.** Book a slot at `https://paulwerner.net/book/` with a second email address. Check that the confirmation arrives, that the appointment appears in Proton Calendar, and that cancelling through the emailed link removes it again.
+
+If the service cannot fetch the busy calendar it refuses all bookings and reports unhealthy, so a wrong or revoked link shows up as "Booking is temporarily unavailable" on the page; `docker compose logs booking` names the cause.
+
+Bookings are stored in SQLite on the `booking_data` volume. The service deletes them 90 days after the appointment and writes a consistent copy to `/data/backup/bookings.db` once a day. No host-level backup picks that copy up yet.
+
 ## Update workflow
 
 The standard loop: edit locally → commit → push → `git pull` on the server. The only file that lives exclusively on the server is `.env`.
@@ -112,7 +145,10 @@ What to do after `git pull`, depending on what changed:
 | `Caddyfile` | `docker compose restart caddy` |
 | `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme). If files under `ghost-theme/assets/` changed, the commit also bumps `version` in `ghost-theme/package.json`; without that, browsers keep the cached CSS |
 | `docker-compose.yml` or `.env` | `docker compose up -d` |
+| `booking/src/`, `booking/package*.json` or `booking/Dockerfile` | `docker compose up -d --build booking` |
+| `booking/config/availability.yml` | `docker compose restart booking` |
 | Nothing — upstream security release (e.g. Node.js, MySQL, Caddy) | `docker compose pull && docker compose up -d` (`up -d` alone keeps the cached image for an unchanged tag) |
+| Nothing — Node.js security release affecting the booking service | `docker compose build --pull booking && docker compose up -d booking`. The booking image is built on the server, so `docker compose pull` does not refresh its Node.js base image |
 
 ### Host updates and automatic reboots
 

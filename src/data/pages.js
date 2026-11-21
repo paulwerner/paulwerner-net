@@ -6,6 +6,8 @@
 // navLabel     → included in the footer legal navigation (order preserved)
 // updated      → sitemap <lastmod>; set by hand so builds stay deterministic
 // priority     → sitemap <priority>
+// unlisted     → kept out of sitemap.xml and marked noindex
+// referrer     → <meta name="referrer"> value, for pages with secrets in the URL
 
 export const SITE_URL = 'https://paulwerner.net';
 
@@ -18,6 +20,24 @@ export const pages = [
       'Paul Werner — independent software engineer in Hamburg. Ten years designing and building the systems behind financial services, from payments to regulatory reporting.',
     updated: '2026-11-21',
     priority: '1.0',
+  },
+  {
+    slug: 'book',
+    file: 'book.ejs',
+    title: 'Book an Appointment — Paul Werner',
+    description: 'Pick a free time for a call with Paul Werner.',
+    updated: '2026-11-21',
+    priority: '0.8',
+  },
+  {
+    // Reached only through the link in a confirmation email, which carries
+    // the booking's access token in the query string.
+    slug: 'book/manage',
+    file: 'book-manage.ejs',
+    title: 'Your Appointment — Paul Werner',
+    description: 'View or cancel your appointment.',
+    unlisted: true,
+    referrer: 'no-referrer',
   },
   {
     slug: 'imprint',
@@ -59,6 +79,8 @@ export const pages = [
 ];
 
 export const navPages = pages.filter((page) => page.navLabel);
+
+export const sitemapPages = pages.filter((page) => !page.unlisted);
 
 export const pageUrl = (page) => (page.slug ? `${SITE_URL}/${page.slug}/` : `${SITE_URL}/`);
 

@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ejs from 'ejs';
 
-import { pages, navPages, pagePath, pageUrl } from './src/data/pages.js';
+import { pages, navPages, sitemapPages, pagePath, pageUrl } from './src/data/pages.js';
 import { assertContrast, AA_TEXT, AA_UI } from './scripts/contrast-report.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -103,7 +103,7 @@ function copyStatic() {
 }
 
 function writeSitemap() {
-  const urls = pages
+  const urls = sitemapPages
     .map(
       (page) => `  <url>
     <loc>${pageUrl(page)}</loc>
@@ -121,7 +121,7 @@ ${urls}
 </urlset>
 `;
   fs.writeFileSync(path.join(OUT, 'sitemap.xml'), xml);
-  console.log(`  sitemap site/sitemap.xml (${pages.length} urls)`);
+  console.log(`  sitemap site/sitemap.xml (${sitemapPages.length} urls)`);
 }
 
 // /accessibility/ declares WCAG 2.1 AA, and the tightest pair has little
