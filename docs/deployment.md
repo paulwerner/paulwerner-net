@@ -26,7 +26,7 @@ scp -i ~/.ssh/hetzner_paulwerner scripts/deploy-server.sh root@178.105.43.46:/ro
 ssh -i ~/.ssh/hetzner_paulwerner root@178.105.43.46 'bash /root/deploy-server.sh'
 ```
 
-The script is idempotent — safe to re-run. It updates packages, enables unattended security upgrades, disables SSH password auth, configures UFW (22/80/443), installs Docker + Compose, creates a 1 GB swapfile, clones the repo into `/opt/paulwerner-net`, and seeds a `.env` from `.env.example`.
+The script is idempotent — safe to re-run. It updates packages, enables unattended security upgrades (with an automatic reboot at 04:00 server time when an update requires one), disables SSH password auth, configures UFW (22/80/443), installs Docker + Compose, creates a 1 GB swapfile, clones the repo into `/opt/paulwerner-net`, and seeds a `.env` from `.env.example`.
 
 ### 2. Configure `.env`
 
@@ -99,6 +99,28 @@ What to do after `git pull`, depending on what changed:
 | `ghost-theme/` | `docker compose restart ghost` (Ghost caches the active theme) |
 | `docker-compose.yml` or `.env` | `docker compose up -d` |
 | Nothing — upstream security release (e.g. Node.js, MySQL, Caddy) | `docker compose pull && docker compose up -d` (`up -d` alone keeps the cached image for an unchanged tag) |
+
+### Host updates and automatic reboots
+
+Ubuntu's unattended upgrades install security updates daily. Kernel updates only take effect after a reboot, so the provisioning script writes `/etc/apt/apt.conf.d/52unattended-upgrades-local`, which lets unattended-upgrades reboot the server at 04:00 server time (UTC) whenever an installed update requires it. Expect about a minute of downtime; the containers come back on their own (`restart: unless-stopped`).
+
+To apply the setting to a server provisioned before it existed, create the file by hand (re-running the whole provisioning script also works):
+
+```bash
+printf '%s\n' \
+  'Unattended-Upgrade::Automatic-Reboot "true";' \
+  'Unattended-Upgrade::Automatic-Reboot-Time "04:00";' \
+  > /etc/apt/apt.conf.d/52unattended-upgrades-local
+```
+
+To check the state of the host, or to patch it immediately instead of waiting for the nightly run:
+
+```bash
+uname -r                           # running kernel
+ls /var/run/reboot-required        # exists when a reboot is pending
+apt update && apt upgrade -y       # install pending updates now
+reboot                             # boot the new kernel now
+```
 
 ### Major Ghost upgrades
 

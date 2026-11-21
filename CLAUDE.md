@@ -38,7 +38,7 @@ All services run on a single VPS via Docker Compose on a shared bridge network. 
 
 ## Hosting
 
-Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the full decision (plan specs, cost, alternatives considered, firewall and backup strategy).
+Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/001-hosting-using-hetzner.md](docs/decisions/001-hosting-using-hetzner.md) for the hosting decision (cost, alternatives considered, firewall and backup strategy). That record names the CX23 plan; the server was provisioned as a CAX11 instead, so container images must be available for `linux/arm64`. Server details live in [docs/deployment.md](docs/deployment.md).
 
 ## Domain Mapping
 
@@ -80,6 +80,8 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
 │   ├── tag.hbs
 │   ├── error-404.hbs
 │   └── package.json
+├── scripts/
+│   └── deploy-server.sh    # idempotent VPS provisioning
 └── site/                   # static landing page + legal pages served by Caddy
     ├── assets/
     │   ├── avatar_small.png
@@ -95,7 +97,7 @@ Hetzner Cloud CX23 in Nuremberg (NBG-1), Ubuntu 24.04 LTS. See [docs/decisions/0
     └── index.html
 ```
 
-A `scripts/` directory for deployment and backup helpers will appear in a later phase and is not scaffolded yet.
+The `scripts/` directory holds `deploy-server.sh`, the idempotent provisioning script for the VPS (package updates, unattended upgrades with automatic reboots, SSH hardening, UFW, Docker, swap). It is the one place where host-level configuration lives. Backup helpers are not scaffolded yet.
 
 ## Environment Variables
 
