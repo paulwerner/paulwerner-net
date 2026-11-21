@@ -1,0 +1,7 @@
+# robots.txt for paulwerner.net only — robots.txt is per-host, so demo or
+# staging subdomains (and the Ghost blog) each serve their own.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://paulwerner.net/sitemap.xml

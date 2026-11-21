@@ -1,0 +1,14 @@
+  <main id="main" class="max-w-[720px] mx-auto px-6 pt-12 pb-12 flex-1 w-full">
+<%- include('../partials/legal-header.ejs', { heading: 'Imprint' }) %>
+    <div class="mt-10 font-serif text-[17px] leading-[1.8]">
+      <p>Information pursuant to Sec. 5 German Digital Services Act (Digitale-Dienste-Gesetz&nbsp;&mdash; DDG)</p>
+
+      <p class="mt-6">
+        Paul Werner<br>
+        {{env "IMPRINT_STREET"}}<br>
+        {{env "IMPRINT_CITY"}}
+      </p>
+
+      <p class="mt-6">Email: contact(at)paulwerner.net</p>
+    </div>
+  </main>

@@ -6,7 +6,7 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 
 ## Tech Stack
 
-- **Landing page**: Plain HTML + Tailwind CSS loaded via the Tailwind Play CDN (no build step; a CLI build step can be introduced later if fidelity or offline use demands it)
+- **Landing page**: Semantic HTML templated with EJS, styled with Tailwind CSS v4 compiled by the Tailwind CLI. Hand-written source lives in `src/`; `build.mjs` generates `site/`, which is committed and served
 - **Blog engine**: Ghost 6 (official `ghost:6-alpine` image, Node.js 22)
 - **Database**: MySQL 8 (Ghost's recommended database)
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
@@ -49,7 +49,10 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 
 - **Cost-conscious** — this is a personal blog, not enterprise infrastructure. Prefer simple solutions over complex ones.
 - **Docker-only deployment** — everything runs in containers. No software installed on the host besides Docker and Docker Compose.
-- **Static landing page** — plain HTML + Tailwind CSS with no JavaScript framework. Tailwind is loaded via the Tailwind Play CDN (`https://cdn.tailwindcss.com`) with an inline `tailwind.config` for brand tokens. The deployed output is a single HTML file plus the `assets/` directory. A CLI build step can be introduced later if fidelity, performance, or offline use becomes a concern.
+- **Zero third-party requests** — nothing served from `site/` or `ghost-theme/` may reference an external origin. No CDN, no font service, no analytics, no embeds. Fonts are self-hosted (woff2, OFL licences shipped alongside), and `npm run verify:no-third-party` enforces this. The privacy policy and the accessibility statement both depend on it staying true. The check only reads source files: markup that Ghost injects at render time through `{{ghost_head}}` (portal, search, comment counts, member attribution) is invisible to it. The theme excludes the first three; the rest depends on Ghost Admin settings listed in `docs/deployment.md` → "Privacy-relevant Ghost settings". Verify changes to the theme head in a browser against a running Ghost.
+- **Static landing page** — no JavaScript framework. `build.mjs` renders EJS templates and compiles one stylesheet; the deployed output is HTML plus `assets/`.
+- **`site/` is generated and committed** — the production server only runs `git pull` and Caddy serves `./site` via bind mount. Nothing compiles there. Any change under `src/` means running `npm run build` and committing the regenerated `site/` in the same change.
+- **Accessibility is a shipped promise** — the site publishes a WCAG 2.1 AA conformance statement at `/accessibility/`. Changes to markup or palette must keep that true: run axe on all five pages and `npm run contrast` for colour changes.
 - **Ghost best practices** — follow Ghost's official hosting recommendations (MySQL, not SQLite). Refer to https://ghost.org/docs/ for configuration and theming.
 
 ## Directory Structure
@@ -58,6 +61,8 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 .
 ├── .env.example            # template for environment variables
 ├── .gitignore
+├── build.mjs               # static build: EJS + Tailwind CLI -> site/
+├── package.json            # build tooling only (Tailwind, EJS, @fontsource)
 ├── Caddyfile               # reverse-proxy config (Caddy 2)
 ├── CLAUDE.md
 ├── README.md
@@ -68,10 +73,13 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 │   ├── learnings/          # brief discovery notes (NNN-*.md)
 │   ├── plans/              # session plans (NNN-*.md)
 │   └── sessions/           # session summaries (NNN-*.md)
+├── scripts/
+│   ├── contrast-report.mjs # WCAG ratios computed from the shipped tokens
+│   └── deploy-server.sh    # idempotent VPS provisioning
 ├── ghost-theme/            # custom Ghost theme (Handlebars + plain CSS)
 │   ├── assets/
 │   │   ├── css/            # theme.css (brand tokens, layout, prose) + prism.css
-│   │   ├── fonts/          # bundled TravelingTypewriter.otf
+│   │   ├── fonts/          # self-hosted woff2 + OFL licences
 │   │   └── js/             # bundled Prism (core + languages + toolbar plugins)
 │   ├── partials/           # navigation, footer, post-card, pagination
 │   ├── default.hbs         # base layout consumed by every template
@@ -80,24 +88,40 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 │   ├── tag.hbs
 │   ├── error-404.hbs
 │   └── package.json
-├── scripts/
-│   └── deploy-server.sh    # idempotent VPS provisioning
-└── site/                   # static landing page + legal pages served by Caddy
-    ├── assets/
-    │   ├── avatar_small.png
-    │   ├── background.png
-    │   └── fonts/
-    │       └── TravelingTypewriter.otf
-    ├── disclaimer/
-    │   └── index.html
-    ├── imprint/
-    │   └── index.html
-    ├── privacy/
-    │   └── index.html
-    └── index.html
+├── src/                    # hand-written source for the static site
+│   ├── assets/             # images + TravelingTypewriter.otf (font source)
+│   ├── data/pages.js       # page registry: footer nav, sitemap, titles
+│   ├── layouts/base.ejs    # <head>, skip link, footer, shared scripts
+│   ├── pages/*.ejs         # one per output page
+│   ├── partials/           # footer, legal-header
+│   ├── static/             # copied to the site root (robots.txt)
+│   └── styles/             # tokens.css (@theme) + main.css (entry point)
+└── site/                   # GENERATED — do not edit by hand; committed and served
+    ├── assets/             # css/, fonts/ (woff2 + licences), images
+    ├── accessibility/index.html
+    ├── disclaimer/index.html
+    ├── imprint/index.html
+    ├── privacy/index.html
+    ├── index.html
+    ├── robots.txt
+    └── sitemap.xml
 ```
 
-The `scripts/` directory holds `deploy-server.sh`, the idempotent provisioning script for the VPS (package updates, unattended upgrades with automatic reboots, SSH hardening, UFW, Docker, swap). It is the one place where host-level configuration lives. Backup helpers are not scaffolded yet.
+## Build
+
+```bash
+npm install          # once
+npm run build        # src/ -> site/
+npm run dev          # rebuild on change
+npm run contrast     # WCAG ratios for every brand token pair
+npm run verify:no-third-party
+```
+
+The build renders each page in `src/data/pages.js`, compiles `src/styles/main.css`, copies assets and self-hosted fonts, writes `robots.txt` and `sitemap.xml`, and asserts that the Caddy `{{env ...}}` placeholders in the imprint survived templating. Brand tokens are defined once, in `src/styles/tokens.css`. See [docs/decisions/003-static-build-tailwind-v4-and-ejs.md](docs/decisions/003-static-build-tailwind-v4-and-ejs.md).
+
+`site/imprint/index.html` is post-processed by Caddy's `templates` directive at request time — the `{{env "IMPRINT_STREET"}}` / `{{env "IMPRINT_CITY"}}` placeholders must survive any change to the build.
+
+`scripts/deploy-server.sh` is the idempotent provisioning script for the VPS (package updates, unattended upgrades with automatic reboots, SSH hardening, UFW, Docker, swap). It is the one place where host-level configuration lives. Backup helpers are not scaffolded yet.
 
 ## Environment Variables
 
@@ -129,6 +153,8 @@ Each session follows this flow — do not skip or reorder steps:
 - Refer to Ghost's theme documentation: https://ghost.org/docs/themes/
 - Test themes using `ghost inspect` or by uploading to the running Ghost instance.
 - Syntax highlighting uses a self-hosted Prism.js bundle (core + language packs + toolbar + copy-to-clipboard plugin) committed under `ghost-theme/assets/js/`. Prism tokens are re-colored to the brand palette in `ghost-theme/assets/css/prism.css`.
+- Fonts are self-hosted under `ghost-theme/assets/fonts/` with their OFL licences: TravelingTypewriter, Source Serif 4 (400, 400 italic, 600, 700) and JetBrains Mono (400, 400 italic, 700 — `code`/`pre` and Prism's comment and bold tokens). The theme is not part of the `src/` build; it keeps its own `:root` token block, which duplicates the palette in `src/styles/tokens.css` by design.
+- **Bump `version` in `ghost-theme/package.json` whenever theme assets change** — Ghost's `?v=` asset hash derives from it, not from file contents (learning 002).
 
 ## Brand & Design
 

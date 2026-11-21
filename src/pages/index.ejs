@@ -1,0 +1,176 @@
+  <div id="floating-avatar" class="fixed top-5 left-5 w-11 h-11 rounded-full border-2 border-accent overflow-hidden z-40 opacity-0 scale-75 pointer-events-none transition-all duration-300 motion-reduce:transition-none">
+    <img src="/assets/avatar_small.png" alt="" class="w-full h-full object-cover">
+  </div>
+
+  <main id="main" class="flex-1">
+    <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden px-4">
+      <div class="hero-bg absolute inset-0 z-0" aria-hidden="true"></div>
+      <div class="hero-grain absolute inset-0 z-0 pointer-events-none" aria-hidden="true"></div>
+
+      <div id="hero-card" class="relative z-10 w-[90%] sm:w-[85%] max-w-[640px] mx-auto bg-bg border-[3px] border-accent rounded-md shadow-card px-6 pt-4 pb-7 sm:px-8 sm:pt-5 sm:pb-9 text-center motion-safe:animate-hero-in">
+        <img src="/assets/avatar_small.png" alt="Cartoon avatar of Paul Werner" class="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] rounded-full border-[3px] border-accent mt-[-55px] sm:mt-[-70px] mx-auto object-cover">
+
+        <h1 class="font-serif text-[28px] sm:text-[36px] font-bold tracking-[1px] mt-5">Paul Werner</h1>
+
+        <p class="font-typewriter text-[14px] sm:text-base uppercase tracking-[4px] text-text mt-3">{ SOFTWARE ENGINEER }</p>
+
+        <figure class="mt-6">
+          <blockquote class="font-serif text-[15px] italic text-text max-w-[480px] mx-auto leading-relaxed">
+            Einstein's Three Rules of Work: Out of clutter find simplicity. From discord find harmony. In the middle of difficulty lies opportunity.
+          </blockquote>
+          <figcaption class="font-typewriter text-[13px] tracking-[1px] text-hover mt-3"><cite class="not-italic">— John Archibald Wheeler</cite></figcaption>
+        </figure>
+      </div>
+
+      <a id="scroll-indicator" href="#about" class="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-muted hover:text-link transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+        <span class="font-typewriter text-[11px] uppercase tracking-wider">scroll</span>
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </a>
+    </section>
+    <section id="about" class="max-w-[720px] mx-auto pt-[70px] sm:pt-[100px] pb-[60px] sm:pb-[80px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">About</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <div class="max-w-[600px] mx-auto mt-12 font-serif text-[17px] leading-[1.8] text-text">
+        <p>Fullstack engineer with a backend focus — ten years of building systems in financial services, from payment processing to regulatory reporting. Most of my work operates behind APIs: data pipelines, transaction engines, the kind of infrastructure that needs to be right the first time.</p>
+        <p class="mt-6">Now working independently from Hamburg. I like building things from scratch, understanding every layer of the stack, and sharing what I learn along the way.</p>
+      </div>
+    </section>
+    <section id="posts-section" class="max-w-[780px] mx-auto pt-10 pb-[60px] sm:pb-[80px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Recent Posts</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <div id="posts-list" class="flex flex-col gap-4 mt-12" hidden></div>
+
+      <p id="posts-empty" class="font-typewriter text-[14px] uppercase tracking-[2px] text-muted text-center mt-12">Coming soon</p>
+
+      <div id="posts-all" class="text-center mt-10" hidden>
+        <a id="posts-all-link" href="#" class="inline-flex items-center gap-2 font-typewriter text-[14px] uppercase tracking-[1.5px] text-link hover:text-hover transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 focus-visible:rounded-sm">
+          <span>All posts</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"/>
+            <polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+    <section id="projects" class="max-w-[720px] mx-auto pt-10 pb-[80px] sm:pb-[100px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Projects</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <p class="font-typewriter text-[14px] uppercase tracking-[2px] text-muted text-center mt-12">Coming soon</p>
+    </section>
+    <section id="contact" class="max-w-[720px] mx-auto pt-10 pb-[80px] sm:pb-[100px] px-6">
+      <h2 class="font-typewriter text-[28px] tracking-[2px] text-center uppercase">Project in Mind?</h2>
+      <span class="block w-10 h-0.5 bg-accent mx-auto mt-2" aria-hidden="true"></span>
+
+      <div class="text-center mt-12">
+        <a href="mailto:contact@paulwerner.net" class="inline-block font-typewriter text-[14px] uppercase tracking-[2px] bg-accent text-bg rounded-md px-8 py-3 transition-colors duration-300 hover:bg-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">Let's talk</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const card = document.getElementById('hero-card');
+    const float = document.getElementById('floating-avatar');
+    new IntersectionObserver(([entry]) => {
+      const hide = entry.isIntersecting;
+      float.classList.toggle('opacity-0', hide);
+      float.classList.toggle('scale-75', hide);
+      float.classList.toggle('pointer-events-none', hide);
+    }, { threshold: 0.1 }).observe(card);
+
+    const indicator = document.getElementById('scroll-indicator');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    indicator.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      document.getElementById('about').scrollIntoView({
+        behavior: reduceMotion.matches ? 'auto' : 'smooth',
+      });
+    });
+
+    const FADE_DISTANCE = 200;
+    const fadeIndicator = () => {
+      indicator.style.opacity = Math.max(0, 1 - window.scrollY / FADE_DISTANCE);
+    };
+    fadeIndicator();
+    window.addEventListener('scroll', fadeIndicator, { passive: true });
+  </script>
+
+  <script>
+    // Ghost Content API keys are read-only and public by design — safe to commit.
+    const isLocal = window.location.hostname === 'localhost';
+    const GHOST = {
+      GHOST_URL: isLocal ? 'http://blog.localhost' : 'https://blog.paulwerner.net',
+      CONTENT_API_KEY: isLocal
+        ? '346785a9454fb64a5cd04861b2'
+        : 'c34ac9012e8f4e153f40cb2586',
+    };
+
+    (async () => {
+      const list = document.getElementById('posts-list');
+      const empty = document.getElementById('posts-empty');
+      const all = document.getElementById('posts-all');
+      const allLink = document.getElementById('posts-all-link');
+      allLink.href = GHOST.GHOST_URL;
+
+      const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      const card = (post) => {
+        const article = document.createElement('a');
+        article.href = post.url;
+        article.className = 'block no-underline text-text bg-card-bg border border-border rounded-md p-6 sm:p-7 transition-all duration-300 hover:bg-inset-bg hover:border-accent hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2';
+
+        const h3 = document.createElement('h3');
+        h3.className = 'font-serif text-[20px] font-semibold leading-[1.35]';
+        h3.textContent = post.title || '';
+        article.appendChild(h3);
+
+        if (post.excerpt) {
+          const p = document.createElement('p');
+          p.className = 'font-serif text-[15px] text-muted leading-[1.6] mt-2';
+          p.textContent = post.excerpt;
+          article.appendChild(p);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'flex flex-wrap items-center gap-x-4 gap-y-2 mt-4';
+
+        if (post.published_at) {
+          const d = new Date(post.published_at);
+          const time = document.createElement('time');
+          time.setAttribute('datetime', d.toISOString().slice(0, 10));
+          time.className = 'font-typewriter text-[11px] uppercase tracking-[1.5px] text-muted';
+          time.textContent = dateFmt.format(d).toUpperCase();
+          meta.appendChild(time);
+        }
+
+        (post.tags || []).forEach((tag) => {
+          const pill = document.createElement('span');
+          pill.className = 'inline-block font-typewriter text-[12px] tracking-[0.5px] text-accent border border-border rounded-[3px] px-2.5 py-0.5';
+          pill.textContent = (tag.name || '').toLowerCase();
+          meta.appendChild(pill);
+        });
+
+        article.appendChild(meta);
+        return article;
+      };
+
+      try {
+        const url = `${GHOST.GHOST_URL}/ghost/api/content/posts/?key=${encodeURIComponent(GHOST.CONTENT_API_KEY)}&limit=3&fields=title,slug,url,excerpt,published_at&include=tags`;
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        const posts = (data && data.posts) || [];
+        if (posts.length === 0) return;
+        posts.forEach((post) => list.appendChild(card(post)));
+        empty.hidden = true;
+        list.hidden = false;
+        all.hidden = false;
+      } catch (_) {
+        // Network/CORS error — leave the "Coming soon" placeholder visible.
+      }
+    })();
+  </script>

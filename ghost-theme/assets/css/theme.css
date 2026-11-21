@@ -1,7 +1,66 @@
+/* All faces self-hosted from ../fonts/ (licences in ../fonts/licenses/); only
+ * faces the templates and prism.css actually render are declared. */
+
 @font-face {
     font-family: "TravelingTypewriter";
-    src: url("../fonts/TravelingTypewriter.otf") format("opentype");
+    src: url("../fonts/TravelingTypewriter.woff2") format("woff2");
     font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Source Serif 4";
+    src: url("../fonts/source-serif-4-latin-400-normal.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Source Serif 4";
+    src: url("../fonts/source-serif-4-latin-400-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Source Serif 4";
+    src: url("../fonts/source-serif-4-latin-600-normal.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Source Serif 4";
+    src: url("../fonts/source-serif-4-latin-700-normal.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("../fonts/jetbrains-mono-latin-400-italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("../fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
@@ -18,7 +77,14 @@
     --muted: #8a8478;
     --border: #2a2420;
 
-    --font-display: "TravelingTypewriter", "Special Elite", monospace;
+    /* Text colours for the light post panel (.post-content, background
+       --link). The dark-theme accents fall below 4.5:1 there, so the panel
+       uses darker shades of the same hue: 5.4, 7.8 and 5.5 to 1. */
+    --paper-link: #7a5324;
+    --paper-link-hover: #5c3d12;
+    --paper-muted: #6a563e;
+
+    --font-display: "TravelingTypewriter", ui-monospace, monospace;
     --font-serif: "Source Serif 4", Georgia, serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -32,13 +98,26 @@
     box-sizing: border-box;
 }
 
+/* Styled, not hidden: the scrollbar is the only persistent indicator of
+   scroll position and length. */
 html {
     background: var(--bg);
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--hover) var(--bg);
 }
 
 html::-webkit-scrollbar {
-    display: none;
+    width: 10px;
+    height: 10px;
+}
+
+html::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+html::-webkit-scrollbar-thumb {
+    background: var(--hover);
+    border-radius: 5px;
 }
 
 body {
@@ -172,6 +251,37 @@ hr {
 .post-template .site-main,
 .page-template .site-main {
     max-width: var(--content-width);
+}
+
+/* Visible only when focused; first tab stop on every page. */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 10px 14px;
+    background: var(--bg);
+    color: var(--link);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+}
+
+.skip-link:focus {
+    left: 12px;
+    top: 12px;
+}
+
+/* Exposed to assistive technology, removed from the visual layout. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .site-header {
@@ -561,20 +671,25 @@ hr {
 }
 
 .post-content a {
-    color: var(--accent);
+    color: var(--paper-link);
     text-decoration: underline;
-    text-decoration-color: var(--hover);
+    text-decoration-color: var(--paper-link);
     text-underline-offset: 0.2em;
     transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .post-content a:hover {
-    color: var(--hover);
-    text-decoration-color: var(--accent);
+    color: var(--paper-link-hover);
+    text-decoration-color: var(--paper-link-hover);
 }
 
 .post-content a:visited {
-    color: var(--hover);
+    color: var(--paper-link-hover);
+}
+
+/* The global accent outline is 2.4:1 against the panel; 3:1 is required. */
+.post-content :focus-visible {
+    outline-color: var(--paper-link);
 }
 
 .post-content ul,
@@ -591,7 +706,7 @@ hr {
     margin: 1.5em 0;
     padding: 0.25em 0 0.25em 1.5em;
     border-left: 3px solid var(--accent);
-    color: var(--hover);
+    color: var(--paper-muted);
     font-style: italic;
 }
 
@@ -695,7 +810,7 @@ hr {
     font-family: var(--font-display);
     font-size: 12px;
     letter-spacing: 0.5px;
-    color: var(--muted);
+    color: var(--paper-muted);
     text-align: center;
     margin-top: 8px;
 }
@@ -704,7 +819,10 @@ hr {
     margin: 1.5em 0;
 }
 
-.post-content .kg-bookmark-container {
+/* Ghost's own card stylesheet (cards.min.css) loads after theme.css. The dark
+   cards below sit on the light post panel, so each sets its own background
+   and text colours with enough specificity to win over both. */
+.post-content .kg-bookmark-card a.kg-bookmark-container {
     display: flex;
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -715,9 +833,10 @@ hr {
     transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-.post-content .kg-bookmark-container:hover {
+.post-content .kg-bookmark-card a.kg-bookmark-container:hover {
     border-color: var(--accent);
     background: var(--inset-bg);
+    color: var(--text);
 }
 
 .post-content .kg-bookmark-content {
@@ -725,7 +844,7 @@ hr {
     flex-grow: 1;
 }
 
-.post-content .kg-bookmark-title {
+.post-content .kg-bookmark-card .kg-bookmark-title {
     font-family: var(--font-serif);
     font-weight: 600;
     font-size: 17px;
@@ -733,7 +852,8 @@ hr {
     margin: 0;
 }
 
-.post-content .kg-bookmark-description {
+.post-content .kg-bookmark-card .kg-bookmark-description {
+    opacity: 1; /* Ghost's card CSS dims this to 0.7, which drops below 4.5:1 */
     font-family: var(--font-serif);
     font-size: 14px;
     color: var(--muted);
@@ -745,7 +865,8 @@ hr {
     overflow: hidden;
 }
 
-.post-content .kg-bookmark-metadata {
+.post-content .kg-bookmark-card .kg-bookmark-metadata {
+    opacity: 1; /* Ghost's card CSS dims this to 0.7, which drops below 4.5:1 */
     margin-top: 12px;
     font-family: var(--font-display);
     font-size: 11px;
@@ -754,6 +875,11 @@ hr {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.post-content .kg-bookmark-card .kg-bookmark-metadata > span {
+    opacity: 1;
+    color: var(--muted);
 }
 
 .post-content .kg-bookmark-metadata .kg-bookmark-icon {
@@ -773,11 +899,26 @@ hr {
     border-radius: 0;
 }
 
-.post-content .kg-callout-card {
+.post-content .kg-card.kg-callout-card {
     background: var(--inset-bg);
+    color: var(--text);
     border-left: 3px solid var(--accent);
     padding: 16px 20px;
     border-radius: 0 4px 4px 0;
+}
+
+.post-content .kg-callout-card a {
+    color: var(--link);
+    text-decoration-color: var(--hover);
+}
+
+.post-content .kg-callout-card a:hover,
+.post-content .kg-callout-card a:visited {
+    color: var(--gold);
+}
+
+.post-content .kg-callout-card :focus-visible {
+    outline-color: var(--accent);
 }
 
 .post-content .kg-callout-emoji {
@@ -795,24 +936,25 @@ hr {
     max-width: 100%;
 }
 
-.post-content .kg-button-card a {
+.post-content .kg-button-card a.kg-btn {
     display: inline-block;
     font-family: var(--font-display);
     font-size: 14px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--bg);
-    background: var(--accent);
-    border: 1px solid var(--accent);
+    color: var(--link);
+    background: var(--bg);
+    border: 1px solid var(--bg);
     border-radius: 3px;
     padding: 10px 24px;
+    height: auto;
     text-decoration: none;
     transition: background 0.2s ease, color 0.2s ease;
 }
 
-.post-content .kg-button-card a:hover {
-    background: transparent;
-    color: var(--accent);
+.post-content .kg-button-card a.kg-btn:hover {
+    background: var(--inset-bg);
+    color: var(--gold);
 }
 
 .site-footer {
@@ -825,7 +967,9 @@ hr {
 .site-footer__inner {
     padding: 32px 24px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    /* Side columns share what the icons leave, so the four legal links fit
+       on one line; below 900px the footer stacks instead. */
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 24px;
     font-family: var(--font-display);
@@ -872,7 +1016,7 @@ hr {
     color: var(--link);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 899px) {
     .site-footer__inner {
         grid-template-columns: 1fr;
         text-align: center;
