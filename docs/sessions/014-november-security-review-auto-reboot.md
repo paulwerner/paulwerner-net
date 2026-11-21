@@ -24,6 +24,7 @@ The gap was on the host. The provisioning script enabled unattended upgrades but
 - `scripts/deploy-server.sh`: the unattended-upgrades step now writes `/etc/apt/apt.conf.d/52unattended-upgrades-local`, which lets unattended-upgrades reboot the server at 04:00 server time when an installed update requires it.
 - `docs/deployment.md`: new "Host updates and automatic reboots" section — what the setting does, how to apply it to an already-provisioned server, and how to check for a pending reboot.
 - CLAUDE.md: describes the `scripts/` directory, which it previously listed as not yet scaffolded.
+- CLAUDE.md: the hosting section now names the plan the server actually runs on (CAX11, ARM64) instead of CX23. Decision record 001 still says CX23 and stays as written.
 
 ## Key decisions
 
@@ -48,6 +49,8 @@ The gap was on the host. The provisioning script enabled unattended upgrades but
 2. `0d7e603` — `feat(deploy): reboot automatically after updates that require it`
 3. `5db30ff` — `docs: document automatic reboots and host patching`
 
+4. `c308464` — `docs: correct server plan in CLAUDE.md (CAX11, not CX23)`
+
 (Plus this session summary.)
 
 ## What's next
@@ -55,4 +58,3 @@ The gap was on the host. The provisioning script enabled unattended upgrades but
 - Watch for the Ubuntu 24.04 kernel fix for CVE-2026-99288. It will install and reboot on its own once released; confirm afterwards with `uname -r`.
 - Seven of the eleven Ghost advisories from 2026-11-13 were only read by title. Confirm their fixed versions if any of the affected features (comments, imports, private site mode) come into use.
 - Configure SMTP and re-enable staff device verification, so the admin password is no longer the only barrier to the Ghost admin.
-- CLAUDE.md names the server plan as CX23, while README.md, `docs/deployment.md` and the provisioning script say CAX11. Settle which is correct and align them.
