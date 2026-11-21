@@ -51,7 +51,7 @@ export const pages = [
     file: 'accessibility.ejs',
     title: 'Accessibility — Paul Werner',
     description:
-      'Accessibility statement for paulwerner.net: WCAG 2.1 AA conformance, known limitations, and how to report a barrier.',
+      'Accessibility statement for paulwerner.net: WCAG 2.1 AA status, known limitations, and how to report a barrier.',
     navLabel: 'Accessibility',
     updated: '2026-11-21',
     priority: '0.3',
