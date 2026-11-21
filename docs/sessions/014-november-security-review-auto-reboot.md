@@ -48,7 +48,6 @@ The gap was on the host. The provisioning script enabled unattended upgrades but
 1. `8a24882` — `docs: add session 014 plan (November security review, automatic reboots)`
 2. `0d7e603` — `feat(deploy): reboot automatically after updates that require it`
 3. `5db30ff` — `docs: document automatic reboots and host patching`
-
 4. `c308464` — `docs: correct server plan in CLAUDE.md (CAX11, not CX23)`
 
 (Plus this session summary.)
