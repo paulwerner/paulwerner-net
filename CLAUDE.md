@@ -2,13 +2,14 @@
 
 ## Project Overview
 
-This repository holds the content infrastructure for paulwerner.net: a branded landing page served at the root domain and a self-hosted Ghost blog at `blog.paulwerner.net`. Everything runs as Docker containers on a single VPS behind Caddy, which terminates TLS and routes by hostname.
+This repository holds the content infrastructure for paulwerner.net: a branded landing page served at the root domain, a self-hosted Ghost blog at `blog.paulwerner.net`, and a self-hosted appointment scheduler at `paulwerner.net/book/` that syncs with Proton Calendar. Everything runs as Docker containers on a single VPS behind Caddy, which terminates TLS and routes by hostname.
 
 ## Tech Stack
 
 - **Landing page**: Semantic HTML templated with EJS, styled with Tailwind CSS v4 compiled by the Tailwind CLI. Hand-written source lives in `src/`; `build.mjs` generates `site/`, which is committed and served
 - **Blog engine**: Ghost 6 (official `ghost:6-alpine` image, Node.js 22)
 - **Database**: MySQL 8 (Ghost's recommended database)
+- **Booking service**: custom Node.js 22 service (Express 5, better-sqlite3, luxon, node-ical, nodemailer), built on the server from `booking/` — see [docs/decisions/004-self-hosted-booking-over-calendly.md](docs/decisions/004-self-hosted-booking-over-calendly.md)
 - **Reverse proxy**: Caddy 2 (automatic HTTPS via Let's Encrypt)
 - **Container orchestration**: Docker Compose
 - **Ghost theme**: Handlebars (Ghost's templating language)
@@ -17,24 +18,25 @@ This repository holds the content infrastructure for paulwerner.net: a branded l
 ## Architecture
 
 ```
-                        ┌─────────────────────────┐
-                        │         Caddy            │
-                        │  (TLS + static + proxy)  │
-                        └──────┬──────────────┬────┘
-                               │              │
-              paulwerner.net   │              │  blog.paulwerner.net
-                               │              │
-                    ┌──────────▼──┐    ┌──────▼───────┐
-                    │ Landing Page │    │    Ghost      │
-                    │  (static)    │    │  (Node.js)    │
-                    └─────────────┘    └──────┬───────┘
-                                              │
-                                       ┌──────▼───────┐
-                                       │    MySQL      │
-                                       └──────────────┘
+                  ┌────────────────────────────────────┐
+                  │               Caddy                 │
+                  │       (TLS + static + proxy)        │
+                  └───┬───────────────┬────────────┬────┘
+                      │               │            │
+       paulwerner.net │  /api/book/*  │            │ blog.paulwerner.net
+                      │               │            │
+           ┌──────────▼──┐    ┌───────▼─────┐   ┌──▼───────────┐
+           │ Landing Page │    │   Booking   │   │    Ghost      │
+           │  (static)    │    │  (Node.js)  │   │  (Node.js)    │
+           └─────────────┘    └──────┬──────┘   └──────┬───────┘
+                                     │                 │
+                              ┌──────▼──────┐   ┌──────▼───────┐
+                              │   SQLite    │   │    MySQL      │
+                              │  (volume)   │   └──────────────┘
+                              └─────────────┘
 ```
 
-All services run on a single VPS via Docker Compose on a shared bridge network. Caddy is the only service that publishes ports (80/443); Ghost and MySQL are reachable only inside the Compose network.
+All services run on a single VPS via Docker Compose on a shared bridge network. Caddy is the only service that publishes ports (80/443); Ghost, MySQL and the booking service are reachable only inside the Compose network.
 
 ## Hosting
 
@@ -44,6 +46,7 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 
 - `paulwerner.net` → Caddy serves static files from `/srv/site` (bind-mounted from `./site/`).
 - `blog.paulwerner.net` → Caddy `reverse_proxy` to `ghost:2368` on the shared Compose network.
+- `paulwerner.net/api/book*` → Caddy `reverse_proxy` to `booking:3000`. The booking pages themselves (`/book/`, `/book/manage/`) are static pages built from `src/`.
 
 ## Key Constraints
 
@@ -66,7 +69,13 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 ├── Caddyfile               # reverse-proxy config (Caddy 2)
 ├── CLAUDE.md
 ├── README.md
-├── docker-compose.yml      # three-service stack: caddy, ghost, mysql
+├── docker-compose.yml      # four-service stack: caddy, booking, ghost, mysql
+├── docker-compose.dev.yml  # dev overlay: local mail inbox + fixture busy calendar
+├── booking/                # appointment scheduler service (Node.js)
+│   ├── Dockerfile          # multi-stage node:22-alpine
+│   ├── config/availability.yml  # weekly hours, slot length, buffers, limits
+│   ├── src/                # server, config, slot engine, busy poller, db, ics, mailer
+│   └── test/               # node --test suites + fixtures/busy.ics
 ├── docs/
 │   ├── brand/              # brand guidelines, reference imagery
 │   ├── decisions/          # decision records (NNN-*.md)
@@ -99,6 +108,7 @@ Hetzner Cloud CAX11 (ARM64, 2 vCPU, 4 GB RAM) in Nuremberg (NBG-1), Ubuntu 24.04
 └── site/                   # GENERATED — do not edit by hand; committed and served
     ├── assets/             # css/, fonts/ (woff2 + licences), images
     ├── accessibility/index.html
+    ├── book/index.html     # slot picker; book/manage/index.html is the cancel page
     ├── disclaimer/index.html
     ├── imprint/index.html
     ├── privacy/index.html
@@ -122,6 +132,18 @@ The build renders each page in `src/data/pages.js`, compiles `src/styles/main.cs
 `site/imprint/index.html` is post-processed by Caddy's `templates` directive at request time — the `{{env "IMPRINT_STREET"}}` / `{{env "IMPRINT_CITY"}}` placeholders must survive any change to the build.
 
 `scripts/deploy-server.sh` is the idempotent provisioning script for the VPS (package updates, unattended upgrades with automatic reboots, SSH hardening, UFW, Docker, swap). It is the one place where host-level configuration lives. Backup helpers are not scaffolded yet.
+
+## Booking Service
+
+- A small scheduler under `booking/`, reachable only as `/api/book*` through Caddy. Rationale: [decision 004](docs/decisions/004-self-hosted-booking-over-calendly.md). Setup on the server: `docs/deployment.md` → "Booking service".
+- **Proton Calendar sync** (Proton has no API or CalDAV): busy times are polled from the secret "share via link" ICS (`BOOKING_BUSY_ICS_URL`); bookings reach the calendar as emailed `METHOD:REQUEST` invites to `BOOKING_OWNER_EMAIL`, which Proton Mail adds automatically. The owner address must be an attendee, not the organizer, and must differ from `BOOKING_FROM_ADDRESS`.
+- **Fails closed**: without a successful busy-calendar fetch (or with one older than 24 hours) the service refuses bookings and reports unhealthy.
+- **Availability and limits** live in `booking/config/availability.yml`. Edit, then `docker compose restart booking`. Code changes need `docker compose up -d --build booking`.
+- **Email addresses are not verified** before a booking is confirmed. The limits in `availability.yml` (upcoming bookings per address, new bookings per day), the per-client rate limits and the name validation exist because of that; keep free text from visitors out of anything sent to the address they typed.
+- **Data**: bookings live in SQLite on the `booking_data` volume, are deleted 90 days after the appointment (`BOOKING_RETENTION_DAYS`), and are copied daily to `/data/backup/bookings.db`. The privacy policy states the 90 days; change both together.
+- **The image is built locally**, so `docker compose pull` does not update its Node.js base. After a Node.js security release: `docker compose build --pull booking && docker compose up -d booking`.
+- **Tests**: `cd booking && npm test`. For a full local run without Proton: `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build` (mail inbox at `http://localhost:8025`).
+- The booking pages are part of the site build (`src/pages/book.ejs`, `src/pages/book-manage.ejs`) and fall under the same accessibility and zero-third-party rules as every other page.
 
 ## Environment Variables
 

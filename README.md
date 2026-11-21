@@ -4,7 +4,7 @@ Content infrastructure for paulwerner.net — a static landing page at the root 
 
 ## Architecture
 
-A single VPS (Hetzner CAX11 in Nuremberg, Ubuntu 24.04 ARM64) runs three containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 6** (blog CMS), and **MySQL 8** (Ghost's database). Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
+A single VPS (Hetzner CAX11 in Nuremberg, Ubuntu 24.04 ARM64) runs four containers via Docker Compose: **Caddy** (reverse proxy + static file server, terminates TLS via Let's Encrypt), **Ghost 6** (blog CMS), **MySQL 8** (Ghost's database), and a small **booking service** (Node.js, SQLite) behind `/book/` that syncs with Proton Calendar. Caddy is the only service that publishes ports; it serves the landing page directly from a bind-mounted `site/` directory and reverse-proxies the blog subdomain to Ghost.
 
 ## Building the site
 
@@ -36,6 +36,15 @@ docker compose up -d
 
 - Landing page: <http://localhost/>
 - Ghost admin: <http://blog.localhost/ghost/>
+
+For local use set `DOMAIN=http://localhost`, `BLOG_SUBDOMAIN=http://blog.localhost` and `GHOST_URL=http://blog.localhost` in `.env`.
+
+To try the booking page without a Proton account, add the dev overlay. It swaps the busy calendar for a fixture file and sends mail to a local inbox at <http://localhost:8025>:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+cd booking && npm ci && npm test    # unit tests
+```
 
 ## Production
 
