@@ -26,7 +26,7 @@
   </div>
 
   <main id="main" class="flex-1">
-    <section id="hero" class="relative min-h-screen grid place-items-center overflow-hidden px-4">
+    <section id="hero" class="relative min-h-svh grid place-items-center overflow-hidden px-4">
       <div class="hero-bg absolute inset-0 z-0" aria-hidden="true"></div>
       <div class="hero-grain absolute inset-0 z-0 pointer-events-none" aria-hidden="true"></div>
 
@@ -237,6 +237,31 @@
 
 
   <script>
+    // Scroll position bar (styles: .scroll-thumb in styles/main.css).
+    (() => {
+      const root = document.documentElement;
+      const thumb = document.createElement('div');
+      thumb.className = 'scroll-thumb';
+      thumb.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(thumb);
+      root.classList.add('has-scroll-thumb');
+
+      let hideTimer;
+      const update = () => {
+        const view = window.innerHeight;
+        const total = root.scrollHeight;
+        if (total <= view + 1) return thumb.classList.remove('is-visible');
+        const height = Math.max(32, (view * view) / total);
+        const travel = (window.scrollY / (total - view)) * (view - height);
+        thumb.style.height = `${height}px`;
+        thumb.style.transform = `translateY(${travel}px)`;
+        thumb.classList.add('is-visible');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => thumb.classList.remove('is-visible'), 900);
+      };
+      window.addEventListener('scroll', update, { passive: true });
+    })();
+
     document.querySelectorAll('[data-year]').forEach((el) => {
       el.textContent = new Date().getFullYear();
     });
