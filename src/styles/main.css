@@ -52,25 +52,33 @@
 
 /* ---- Base ---- */
 
-/* Styled, not hidden: the scrollbar is the only persistent indicator of
- * scroll position and length. */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-hover) var(--color-bg);
+/* Scroll position: a slim bar that fades in while scrolling and out again,
+ * drawn by the script in layouts/base.ejs. The native scrollbar is hidden
+ * only once that script has run, so without JavaScript it stays. */
+html.has-scroll-thumb {
+  scrollbar-width: none;
 }
 
-html::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+html.has-scroll-thumb::-webkit-scrollbar {
+  display: none;
 }
 
-html::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-html::-webkit-scrollbar-thumb {
+.scroll-thumb {
+  position: fixed;
+  top: 0;
+  right: 3px;
+  z-index: 50;
+  width: 4px;
+  border-radius: 2px;
   background: var(--color-hover);
-  border-radius: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.scroll-thumb.is-visible {
+  opacity: 0.9;
+  transition-duration: 0.1s;
 }
 
 html {
